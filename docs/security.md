@@ -10,17 +10,17 @@ Alvo: controles de OWASP ASVS no nível 2 e mitigação dos riscos do OWASP Top 
 
 ## 1. Modelo de ameaças
 
-| Ativo | Ameaça | Controle | Status |
-|---|---|---|---|
-| Contas e sessões | Força bruta, sequestro de sessão | Supabase Auth, limite de tentativas, cookies/tokens com expiração | Planejado (Fase 2) |
-| Dados por usuário (histórico) | Acesso cruzado entre usuários (IDOR) | RLS em todas as tabelas + teste com dois usuários | Planejado (Fase 2) |
-| Chave `service_role` | Vazamento no frontend ou no repositório | Só no servidor, varredura de segredos no CI | Planejado (Fase 1) |
-| Motor de análise | Requisição arbitrária ao servidor (SSRF) | Sem busca da URL do usuário (D6), lista de saída permitida | Planejado (Fase 5) |
-| Explicação por IA | Prompt injection vindo de feeds ou da URL | Separação de canais, saída em schema, classificação fora da IA | Planejado (Fase 6) |
-| Integridade da classificação | Manipulação de pesos ou de regras | Regras em arquivo versionado, testes de caso, versão salva em cada scan | Planejado (Fase 5) |
-| Disponibilidade e custo | Abuso do endpoint de IA e do scanner | Rate limit por IP e por usuário, limite de tokens | Planejado (Fase 1 e 6) |
-| Spam pelo sistema de e-mail | Uso do envio para terceiros | Envio só para inscritos verificados, sem endpoint de e-mail livre | Planejado (Fase 7) |
-| Dados pessoais | Retenção excessiva, vazamento em log | Minimização, retenção (`database.md` §6), redaction de logs | Planejado (Fase 2) |
+| Ativo                         | Ameaça                                    | Controle                                                                | Status                 |
+| ----------------------------- | ----------------------------------------- | ----------------------------------------------------------------------- | ---------------------- |
+| Contas e sessões              | Força bruta, sequestro de sessão          | Supabase Auth, limite de tentativas, cookies/tokens com expiração       | Planejado (Fase 2)     |
+| Dados por usuário (histórico) | Acesso cruzado entre usuários (IDOR)      | RLS em todas as tabelas + teste com dois usuários                       | Planejado (Fase 2)     |
+| Chave `service_role`          | Vazamento no frontend ou no repositório   | Só no servidor, varredura de segredos no CI                             | Planejado (Fase 1)     |
+| Motor de análise              | Requisição arbitrária ao servidor (SSRF)  | Sem busca da URL do usuário (D6), lista de saída permitida              | Planejado (Fase 5)     |
+| Explicação por IA             | Prompt injection vindo de feeds ou da URL | Separação de canais, saída em schema, classificação fora da IA          | Planejado (Fase 6)     |
+| Integridade da classificação  | Manipulação de pesos ou de regras         | Regras em arquivo versionado, testes de caso, versão salva em cada scan | Planejado (Fase 5)     |
+| Disponibilidade e custo       | Abuso do endpoint de IA e do scanner      | Rate limit por IP e por usuário, limite de tokens                       | Planejado (Fase 1 e 6) |
+| Spam pelo sistema de e-mail   | Uso do envio para terceiros               | Envio só para inscritos verificados, sem endpoint de e-mail livre       | Planejado (Fase 7)     |
+| Dados pessoais                | Retenção excessiva, vazamento em log      | Minimização, retenção (`database.md` §6), redaction de logs             | Planejado (Fase 2)     |
 
 ---
 
@@ -42,14 +42,14 @@ Alvo: controles de OWASP ASVS no nível 2 e mitigação dos riscos do OWASP Top 
 
 **Lista de saída permitida** (configurada em `backend/src/config/egress.ts`, e também no firewall da hospedagem, quando disponível):
 
-| Destino | Finalidade |
-|---|---|
+| Destino                                                 | Finalidade                               |
+| ------------------------------------------------------- | ---------------------------------------- |
 | `urlhaus-api.abuse.ch` (confirmar host na documentação) | Reputação de URL e domínio, com Auth-Key |
-| `www.cisa.gov` | Feed JSON do KEV |
-| `www.cert.br` (confirmar) | Páginas do CERT.br, via Firecrawl |
-| `api.firecrawl.dev` | Coleta de HTML |
-| `api.resend.com` | Envio de e-mail |
-| Host do provedor de IA escolhido | Explicação |
+| `www.cisa.gov`                                          | Feed JSON do KEV                         |
+| `www.cert.br` (confirmar)                               | Páginas do CERT.br, via Firecrawl        |
+| `api.firecrawl.dev`                                     | Coleta de HTML                           |
+| `api.resend.com`                                        | Envio de e-mail                          |
+| Host do provedor de IA escolhido                        | Explicação                               |
 
 Qualquer host fora da lista é recusado e registrado.
 
