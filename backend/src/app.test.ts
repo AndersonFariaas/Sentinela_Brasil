@@ -3,6 +3,7 @@ import type { FastifyInstance } from 'fastify';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { buildApp } from './app.js';
 import type { Env } from './config/env.js';
+import { criarAutenticadorFalso } from '../tests/helpers/autenticador-falso.js';
 
 const ENV_TESTE: Env = {
   NODE_ENV: 'test',
@@ -10,6 +11,8 @@ const ENV_TESTE: Env = {
   PORT: 3000,
   LOG_LEVEL: 'info',
   CORS_ORIGIN: ['http://localhost:5173'],
+  SUPABASE_URL: 'https://projeto.supabase.co',
+  SUPABASE_ANON_KEY: 'chave-publica-de-teste',
 };
 
 describe('API', () => {
@@ -24,7 +27,7 @@ describe('API', () => {
         callback();
       },
     });
-    app = await buildApp(ENV_TESTE, { logStream });
+    app = await buildApp(ENV_TESTE, { logStream, autenticador: criarAutenticadorFalso() });
   });
 
   afterEach(async () => {

@@ -4,6 +4,9 @@ import helmet from '@fastify/helmet';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { criarOpcoesLogger } from './config/logger.js';
 import type { Env } from './config/env.js';
+import { criarAutenticadorSupabase } from './integrations/supabase/autenticador.js';
+import { authRoutes } from './modules/auth/auth.routes.js';
+import type { Autenticador } from './modules/auth/auth.types.js';
 import { healthRoutes } from './modules/health/health.routes.js';
 
 export const PREFIXO_API = '/api/v1';
@@ -17,12 +20,16 @@ interface ErroHttp extends Error {
 interface OpcoesApp {
   /** Stream alternativo do logger. Usado nos testes para inspecionar a saída. */
   logStream?: Writable;
+  /** Autenticador alternativo. Os testes usam uma versão falsa, sem rede. */
+  autenticador?: Autenticador;
 }
 
 export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<FastifyInstance> {
   const app = Fastify({
     logger: criarOpcoesLogger(env, { stream: opcoes.logStream }),
   });
+
+  const autenticador = opcoes.autenticador ?? criarAutenticadorSupabase(env);
 
   await app.register(helmet);
   await app.register(cors, { origin: env.CORS_ORIGIN });
@@ -43,6 +50,7 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
   });
 
   await app.register(healthRoutes, { prefix: PREFIXO_API });
+  await app.register(authRoutes, { prefix: PREFIXO_API, autenticador });
 
   return app;
 }
