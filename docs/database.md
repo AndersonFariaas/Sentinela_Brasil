@@ -311,9 +311,26 @@ Job diário de limpeza, com registro em `audit_log`.
 
 ---
 
-## 8. Decisões a confirmar
+## 8. Decisões aplicadas na Fase 2
 
-1. Aprovar a separação entre `scans` e `analyses` (recomendado).
-2. Aprovar `indicators` globais com junção (recomendado).
-3. Confirmar os prazos de retenção da seção 6.
-4. Confirmar o nome `verification_status` no lugar de `status` em `threats`.
+A proposta de Fase 0 foi implementada nas migrations `database/migrations/0001` a `0004`, com estas diferenças:
+
+1. **Escrita direta bloqueada para dados do servidor.** `scans`, `analyses` e `alerts` não aceitam INSERT nem UPDATE de `anon` ou `authenticated`. Refina a decisão D5 (ver `architecture.md`).
+2. **Usuário escreve só o que é preferência dele:** `profiles.full_name` e `subscriptions`. Cada uma com privilégio de coluna.
+3. **`is_admin()` no schema `private`**, fora da API REST. O advisor do Supabase apontou a exposição da versão em `public`.
+4. **Chave composta em `analyses`:** `(scan_id, user_id)` referencia `scans(id, user_id)`, o que impede um análise apontar para um scan de outro usuário.
+5. **`verification_status` e `scans`/`analyses` separados**, como recomendado.
+
+Itens ainda em aberto da seção anterior: prazos de retenção (seção 6) ainda não têm job de limpeza. Ficam para a Fase 9.
+
+### Verificação realizada
+
+- 33 casos de RLS executados no banco `sentinela-dev`, com papéis `anon` e `authenticated` e JWT simulado, dentro de transação com rollback. Todos passaram.
+- Advisors de segurança do Supabase: sem alertas abertos após a migration 0004.
+- Login real com JWT emitido pelo Supabase: `GET /api/v1/auth/me` retornou 200. Sem token, retornou 401.
+- Suíte automatizada `backend/tests/integration/rls.test.ts`: escrita, mas **ainda não executada**. Precisa de `SUPABASE_SERVICE_ROLE_KEY` no `.env` local.
+
+## 9. Decisões a confirmar
+
+1. Confirmar os prazos de retenção da seção 6.
+2. Confirmar o nome `verification_status` no lugar de `status` em `threats`.
