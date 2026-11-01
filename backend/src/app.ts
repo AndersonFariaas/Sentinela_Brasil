@@ -5,9 +5,12 @@ import Fastify, { type FastifyInstance } from 'fastify';
 import { criarOpcoesLogger } from './config/logger.js';
 import type { Env } from './config/env.js';
 import { criarAutenticadorSupabase } from './integrations/supabase/autenticador.js';
+import { criarLeitorAmeacasSupabase } from './integrations/supabase/leitor-ameacas.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import type { Autenticador } from './modules/auth/auth.types.js';
 import { healthRoutes } from './modules/health/health.routes.js';
+import type { LeitorAmeacas } from './modules/threats/leitor.js';
+import { threatsRoutes } from './modules/threats/threats.routes.js';
 
 export const PREFIXO_API = '/api/v1';
 
@@ -22,6 +25,8 @@ interface OpcoesApp {
   logStream?: Writable;
   /** Autenticador alternativo. Os testes usam uma versão falsa, sem rede. */
   autenticador?: Autenticador;
+  /** Leitor do Threat Feed alternativo. Mesmo papel do autenticador: testes sem rede. */
+  leitor?: LeitorAmeacas;
 }
 
 export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<FastifyInstance> {
@@ -30,6 +35,7 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
   });
 
   const autenticador = opcoes.autenticador ?? criarAutenticadorSupabase(env);
+  const leitor = opcoes.leitor ?? criarLeitorAmeacasSupabase(env);
 
   await app.register(helmet);
   await app.register(cors, { origin: env.CORS_ORIGIN });
@@ -51,6 +57,7 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
 
   await app.register(healthRoutes, { prefix: PREFIXO_API });
   await app.register(authRoutes, { prefix: PREFIXO_API, autenticador });
+  await app.register(threatsRoutes, { prefix: PREFIXO_API, autenticador, leitor });
 
   return app;
 }
