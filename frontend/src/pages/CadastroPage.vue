@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
+import CabecalhoPagina from '@/components/CabecalhoPagina.vue';
+import CampoFormulario from '@/components/CampoFormulario.vue';
+import EstadoErro from '@/components/EstadoErro.vue';
 import { cadastroSchema } from '@/schemas/autenticacao';
 import { errosPorCampo } from '@/schemas/erros';
 import { ErroAutenticacao, useSessaoStore } from '@/stores/sessao';
@@ -47,72 +50,56 @@ async function enviar(): Promise<void> {
 </script>
 
 <template>
-  <main class="mx-auto max-w-sm p-6">
-    <h1 class="text-2xl font-bold">Criar conta</h1>
+  <main class="mx-auto max-w-sm space-y-6 px-4 py-8">
+    <CabecalhoPagina
+      titulo="Criar conta"
+      apoio="Crie sua conta para acompanhar ameaças e verificar endereços."
+    />
 
-    <section v-if="emailParaConfirmar" class="mt-6" aria-live="polite">
+    <section v-if="emailParaConfirmar" class="cartao space-y-4" aria-live="polite">
       <p>
         Enviamos um link de confirmação para <strong>{{ emailParaConfirmar }}</strong
         >. Abra o link para ativar sua conta e depois entre.
       </p>
-      <p class="mt-4">
-        <RouterLink :to="{ name: 'entrar' }" class="min-h-11">Ir para a tela de entrar</RouterLink>
-      </p>
+      <RouterLink :to="{ name: 'entrar' }" class="link">Ir para a tela de entrar</RouterLink>
     </section>
 
-    <form v-else novalidate class="mt-6 space-y-4" @submit.prevent="enviar">
-      <div>
-        <label for="email">E-mail</label>
-        <input
-          id="email"
-          v-model.trim="formulario.email"
-          type="email"
-          autocomplete="email"
-          class="min-h-11 w-full"
-          :aria-invalid="erros.email !== undefined"
-          aria-describedby="erro-email"
-        />
-        <p v-if="erros.email" id="erro-email">{{ erros.email }}</p>
-      </div>
+    <form v-else novalidate class="space-y-4" @submit.prevent="enviar">
+      <CampoFormulario
+        id="email"
+        v-model="formulario.email"
+        rotulo="E-mail"
+        tipo="email"
+        autocomplete="email"
+        :erro="erros.email"
+      />
+      <CampoFormulario
+        id="senha"
+        v-model="formulario.senha"
+        rotulo="Senha"
+        tipo="password"
+        autocomplete="new-password"
+        :erro="erros.senha"
+      />
+      <CampoFormulario
+        id="confirmarSenha"
+        v-model="formulario.confirmarSenha"
+        rotulo="Confirmar senha"
+        tipo="password"
+        autocomplete="new-password"
+        :erro="erros.confirmarSenha"
+      />
 
-      <div>
-        <label for="senha">Senha</label>
-        <input
-          id="senha"
-          v-model="formulario.senha"
-          type="password"
-          autocomplete="new-password"
-          class="min-h-11 w-full"
-          :aria-invalid="erros.senha !== undefined"
-          aria-describedby="erro-senha"
-        />
-        <p v-if="erros.senha" id="erro-senha">{{ erros.senha }}</p>
-      </div>
+      <EstadoErro v-if="erroGeral" :mensagem="erroGeral" />
 
-      <div>
-        <label for="confirmar-senha">Confirmar senha</label>
-        <input
-          id="confirmar-senha"
-          v-model="formulario.confirmarSenha"
-          type="password"
-          autocomplete="new-password"
-          class="min-h-11 w-full"
-          :aria-invalid="erros.confirmarSenha !== undefined"
-          aria-describedby="erro-confirmar-senha"
-        />
-        <p v-if="erros.confirmarSenha" id="erro-confirmar-senha">{{ erros.confirmarSenha }}</p>
-      </div>
-
-      <p v-if="erroGeral" role="alert">{{ erroGeral }}</p>
-
-      <button type="submit" class="min-h-11 w-full" :disabled="enviando">
+      <button type="submit" class="botao-primario" :disabled="enviando">
         {{ enviando ? 'Criando conta…' : 'Criar conta' }}
       </button>
     </form>
 
-    <p v-if="!emailParaConfirmar" class="mt-6">
+    <p v-if="!emailParaConfirmar" class="text-texto-suave">
       Já tem conta?
-      <RouterLink :to="{ name: 'entrar' }" class="min-h-11">Entrar</RouterLink>
+      <RouterLink :to="{ name: 'entrar' }" class="link">Entrar</RouterLink>
     </p>
   </main>
 </template>

@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { reactive, ref } from 'vue';
 import { RouterLink, useRoute, useRouter } from 'vue-router';
+import CampoFormulario from '@/components/CampoFormulario.vue';
+import CabecalhoPagina from '@/components/CabecalhoPagina.vue';
+import EstadoErro from '@/components/EstadoErro.vue';
 import { entrarSchema } from '@/schemas/autenticacao';
 import { errosPorCampo } from '@/schemas/erros';
 import { destinoSeguro } from '@/router';
@@ -42,48 +45,37 @@ async function enviar(): Promise<void> {
 </script>
 
 <template>
-  <main class="mx-auto max-w-sm p-6">
-    <h1 class="text-2xl font-bold">Entrar</h1>
+  <main class="mx-auto max-w-sm space-y-6 px-4 py-8">
+    <CabecalhoPagina titulo="Entrar" apoio="Use o e-mail e a senha da sua conta." />
 
-    <form novalidate class="mt-6 space-y-4" @submit.prevent="enviar">
-      <div>
-        <label for="email">E-mail</label>
-        <input
-          id="email"
-          v-model.trim="formulario.email"
-          type="email"
-          autocomplete="email"
-          class="min-h-11 w-full"
-          :aria-invalid="erros.email !== undefined"
-          aria-describedby="erro-email"
-        />
-        <p v-if="erros.email" id="erro-email">{{ erros.email }}</p>
-      </div>
+    <form novalidate class="space-y-4" @submit.prevent="enviar">
+      <CampoFormulario
+        id="email"
+        v-model="formulario.email"
+        rotulo="E-mail"
+        tipo="email"
+        autocomplete="email"
+        :erro="erros.email"
+      />
+      <CampoFormulario
+        id="senha"
+        v-model="formulario.senha"
+        rotulo="Senha"
+        tipo="password"
+        autocomplete="current-password"
+        :erro="erros.senha"
+      />
 
-      <div>
-        <label for="senha">Senha</label>
-        <input
-          id="senha"
-          v-model="formulario.senha"
-          type="password"
-          autocomplete="current-password"
-          class="min-h-11 w-full"
-          :aria-invalid="erros.senha !== undefined"
-          aria-describedby="erro-senha"
-        />
-        <p v-if="erros.senha" id="erro-senha">{{ erros.senha }}</p>
-      </div>
+      <EstadoErro v-if="erroGeral" :mensagem="erroGeral" />
 
-      <p v-if="erroGeral" role="alert">{{ erroGeral }}</p>
-
-      <button type="submit" class="min-h-11 w-full" :disabled="enviando">
+      <button type="submit" class="botao-primario" :disabled="enviando">
         {{ enviando ? 'Entrando…' : 'Entrar' }}
       </button>
     </form>
 
-    <p class="mt-6">
+    <p class="text-texto-suave">
       Ainda não tem conta?
-      <RouterLink :to="{ name: 'cadastro' }" class="min-h-11">Criar conta</RouterLink>
+      <RouterLink :to="{ name: 'cadastro' }" class="link">Criar conta</RouterLink>
     </p>
   </main>
 </template>

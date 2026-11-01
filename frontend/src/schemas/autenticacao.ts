@@ -4,7 +4,12 @@ import { z } from 'zod';
 const SENHA_MINIMA = 8;
 const SENHA_MAXIMA = 128;
 
-const emailSchema = z.email({ error: 'Informe um e-mail válido.' }).max(254);
+// Recorta espaços antes de validar: no celular, um espaço no começo é erro comum de digitação.
+const emailSchema = z
+  .string()
+  .trim()
+  .max(254)
+  .pipe(z.email({ error: 'Informe um e-mail válido.' }));
 
 export const entrarSchema = z.object({
   email: emailSchema,

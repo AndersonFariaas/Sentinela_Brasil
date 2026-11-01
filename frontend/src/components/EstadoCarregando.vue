@@ -3,5 +3,5 @@ withDefaults(defineProps<{ texto?: string }>(), { texto: 'Carregando…' });
 </script>
 
 <template>
-  <p role="status" aria-live="polite">{{ texto }}</p>
+  <span role="status" aria-live="polite" class="text-texto-suave">{{ texto }}</span>
 </template>
