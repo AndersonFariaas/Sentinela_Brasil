@@ -328,7 +328,7 @@ Itens ainda em aberto da seção anterior: prazos de retenção (seção 6) aind
 - 33 casos de RLS executados no banco `sentinela-dev`, com papéis `anon` e `authenticated` e JWT simulado, dentro de transação com rollback. Todos passaram.
 - Advisors de segurança do Supabase: sem alertas abertos após a migration 0004.
 - Login real com JWT emitido pelo Supabase: `GET /api/v1/auth/me` retornou 200. Sem token, retornou 401.
-- Suíte automatizada `backend/tests/integration/rls.test.ts`: escrita, mas **ainda não executada**. Precisa de `SUPABASE_SERVICE_ROLE_KEY` no `.env` local.
+- Suíte automatizada `backend/tests/integration/rls.test.ts` (`npm run test:integration`): **15 de 15 testes passaram** contra o projeto `sentinela-dev`. Ela cria os próprios usuários e dados de teste e os remove ao final. Verificado em seguida: nenhum resto ficou no banco.
 
 ## 9. Decisões a confirmar
 
