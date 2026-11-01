@@ -54,3 +54,19 @@ export async function buscarPerfilAtual(token: string): Promise<PerfilUsuario> {
   const corpo: unknown = await resposta.json();
   return perfilSchema.parse(corpo);
 }
+
+/**
+ * GET autenticado para qualquer caminho da API. Devolve o JSON sem validar: quem chama
+ * valida com o schema da resposta esperada. Lança ErroApi para status de erro.
+ */
+export async function obterJsonAutenticado(caminho: string, token: string): Promise<unknown> {
+  const resposta = await fetch(`${API_URL}${caminho}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (!resposta.ok) {
+    throw new ErroApi(resposta.status);
+  }
+
+  return resposta.json();
+}
