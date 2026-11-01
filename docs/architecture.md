@@ -18,18 +18,18 @@ O sistema não substitui antivírus, firewall ou SIEM. Ele reúne fontes públic
 
 ## 2. Decisões principais
 
-| # | Decisão | Alternativa descartada | Motivo |
-|---|---|---|---|
-| D1 | Backend em **Fastify 5 + TypeScript + Zod** | Express (usado no projeto `vigia`) | Exigido pelo escopo. Schemas Zod validam a entrada na fronteira. |
-| D2 | Frontend em **Vue 3 + Vite + Tailwind 4 + Pinia + Vue Router** | React | Exigido pelo escopo. Tailwind 4 permite centralizar tokens com `@theme`. |
-| D3 | Repositório único com as pastas `frontend/` e `backend/`, **sem workspaces** | Workspaces com pacote compartilhado de tipos | Menos ferramentas para um MVP de um mês (YAGNI). O contrato da API fica documentado em OpenAPI. Revisar se a duplicação de tipos incomodar. |
-| D4 | **Supabase** para Auth, Postgres e RLS | Autenticação própria | Exigido pelo escopo. Reduz a superfície de código de autenticação que o time precisa manter. |
-| D5 | Endpoints do usuário consultam o banco **com o JWT do próprio usuário**, para que o RLS também valha no back-end | Back-end usar `service_role` em todas as requisições | A `service_role` ignora RLS. Se for usada em tudo, a autorização passa a depender só do código da aplicação. `service_role` fica restrita a jobs de ingestão e a tarefas administrativas do servidor. |
-| D6 | **Sem requisição ativa à URL analisada** no MVP (o servidor não busca o conteúdo do site enviado pelo usuário) | Inspeção ativa em ambiente isolado | Elimina a maior superfície de SSRF. O escopo só exige inspeção ativa "caso seja necessária". Reavaliar depois do MVP. |
-| D7 | **Motor de risco determinístico**, com pesos em arquivo versionado | Pontuação gerada pela IA | Exigência do escopo: a IA não inventa classificação. |
-| D8 | **Camada de LLM com interface própria** e um adaptador inicial (Anthropic) | Chamadas ao SDK espalhadas pela lógica | Exigência de independência de provedor. Também permite um fallback sem IA. |
-| D9 | Backend em **container Node** (Render, Railway ou Fly.io) | Vercel Functions para o back-end | Jobs de coleta agendados e controle de saída de rede não se encaixam bem em serverless. Frontend continua na Vercel. |
-| D10 | Coleta: **APIs e feeds estruturados** (CISA KEV, URLhaus) consumidos direto; **Firecrawl** só para páginas HTML (CERT.br) | Firecrawl para todas as fontes | Feeds estruturados são mais confiáveis, mais baratos e mais fáceis de rastrear. Firecrawl continua sendo usado de forma efetiva, onde o HTML é a única opção. |
+| #   | Decisão                                                                                                                   | Alternativa descartada                               | Motivo                                                                                                                                                                                                |
+| --- | ------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| D1  | Backend em **Fastify 5 + TypeScript + Zod**                                                                               | Express (usado no projeto `vigia`)                   | Exigido pelo escopo. Schemas Zod validam a entrada na fronteira.                                                                                                                                      |
+| D2  | Frontend em **Vue 3 + Vite + Tailwind 4 + Pinia + Vue Router**                                                            | React                                                | Exigido pelo escopo. Tailwind 4 permite centralizar tokens com `@theme`.                                                                                                                              |
+| D3  | Repositório único com as pastas `frontend/` e `backend/`, **sem workspaces**                                              | Workspaces com pacote compartilhado de tipos         | Menos ferramentas para um MVP de um mês (YAGNI). O contrato da API fica documentado em OpenAPI. Revisar se a duplicação de tipos incomodar.                                                           |
+| D4  | **Supabase** para Auth, Postgres e RLS                                                                                    | Autenticação própria                                 | Exigido pelo escopo. Reduz a superfície de código de autenticação que o time precisa manter.                                                                                                          |
+| D5  | Endpoints do usuário consultam o banco **com o JWT do próprio usuário**, para que o RLS também valha no back-end          | Back-end usar `service_role` em todas as requisições | A `service_role` ignora RLS. Se for usada em tudo, a autorização passa a depender só do código da aplicação. `service_role` fica restrita a jobs de ingestão e a tarefas administrativas do servidor. |
+| D6  | **Sem requisição ativa à URL analisada** no MVP (o servidor não busca o conteúdo do site enviado pelo usuário)            | Inspeção ativa em ambiente isolado                   | Elimina a maior superfície de SSRF. O escopo só exige inspeção ativa "caso seja necessária". Reavaliar depois do MVP.                                                                                 |
+| D7  | **Motor de risco determinístico**, com pesos em arquivo versionado                                                        | Pontuação gerada pela IA                             | Exigência do escopo: a IA não inventa classificação.                                                                                                                                                  |
+| D8  | **Camada de LLM com interface própria** e um adaptador inicial (Anthropic)                                                | Chamadas ao SDK espalhadas pela lógica               | Exigência de independência de provedor. Também permite um fallback sem IA.                                                                                                                            |
+| D9  | Backend em **container Node** (Render, Railway ou Fly.io)                                                                 | Vercel Functions para o back-end                     | Jobs de coleta agendados e controle de saída de rede não se encaixam bem em serverless. Frontend continua na Vercel.                                                                                  |
+| D10 | Coleta: **APIs e feeds estruturados** (CISA KEV, URLhaus) consumidos direto; **Firecrawl** só para páginas HTML (CERT.br) | Firecrawl para todas as fontes                       | Feeds estruturados são mais confiáveis, mais baratos e mais fáceis de rastrear. Firecrawl continua sendo usado de forma efetiva, onde o HTML é a única opção.                                         |
 
 ---
 
@@ -37,23 +37,23 @@ O sistema não substitui antivírus, firewall ou SIEM. Ele reúne fontes públic
 
 Versões consultadas no npm em 31/10/2026. Na Fase 1, a versão exata fica fixada no `package-lock.json`.
 
-| Camada | Pacote | Versão mais recente | Observação |
-|---|---|---|---|
-| Frontend | vue | 3.5.44 | |
-| Frontend | vite | 8.3.5 | Conferir o requisito mínimo de Node na documentação antes de fixar. |
-| Frontend | tailwindcss (+ `@tailwindcss/vite`) | 4.3.3 | Tokens via `@theme`. |
-| Frontend | pinia | 4.1.0 | |
-| Frontend | vue-router | 5.4.0 | |
-| Frontend | lucide-vue-next | 1.0.0 | Ícones. |
-| Frontend | @supabase/supabase-js | 2.118.0 | Cliente com a chave pública (anon) apenas. |
-| Backend | fastify | 5.12.7 | Logger pino já vem embutido, com redaction de campos sensíveis. |
-| Backend | zod | 4.6.7 | Validação de entrada e de respostas de IA e de feeds. |
-| Backend | resend | 6.37.0 | Envio de e-mail com chave de idempotência. |
-| Qualidade | typescript | 7.0.2 | **Atenção:** major recém-lançada. Testar com `vue-tsc` e `typescript-eslint` antes de fixar. Se houver atrito, usar a linha 5.x estável. |
-| Qualidade | vitest | 5.0.5 | Testes unitários e de integração. |
-| Qualidade | eslint | 10.14.0 | |
-| Qualidade | prettier | 3.9.10 | |
-| Runtime | Node.js | ambiente local: 24.21.0 (npm 11.19.0) | Definir na Fase 1: Node 24 LTS (ou 22 LTS) em `engines`, `.nvmrc` e no CI. |
+| Camada    | Pacote                              | Versão mais recente                   | Observação                                                                                                                                  |
+| --------- | ----------------------------------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Frontend  | vue                                 | 3.5.44                                |                                                                                                                                             |
+| Frontend  | vite                                | 8.3.5                                 | Conferir o requisito mínimo de Node na documentação antes de fixar.                                                                         |
+| Frontend  | tailwindcss (+ `@tailwindcss/vite`) | 4.3.3                                 | Tokens via `@theme`.                                                                                                                        |
+| Frontend  | pinia                               | 4.1.0                                 |                                                                                                                                             |
+| Frontend  | vue-router                          | 5.4.0                                 |                                                                                                                                             |
+| Frontend  | lucide-vue-next                     | 1.0.0                                 | Ícones.                                                                                                                                     |
+| Frontend  | @supabase/supabase-js               | 2.118.0                               | Cliente com a chave pública (anon) apenas.                                                                                                  |
+| Backend   | fastify                             | 5.12.7                                | Logger pino já vem embutido, com redaction de campos sensíveis.                                                                             |
+| Backend   | zod                                 | 4.6.7                                 | Validação de entrada e de respostas de IA e de feeds.                                                                                       |
+| Backend   | resend                              | 6.37.0                                | Envio de e-mail com chave de idempotência.                                                                                                  |
+| Qualidade | typescript                          | 6.0.3 (fixada exata)                  | Não usar a 7: o `typescript-eslint` 8.72.1 aceita TypeScript só abaixo de 6.1.0 (verificado na Fase 1). Revisar quando o lint suportar a 7. |
+| Qualidade | vitest                              | 5.0.5                                 | Testes unitários e de integração.                                                                                                           |
+| Qualidade | eslint                              | 10.14.0                               |                                                                                                                                             |
+| Qualidade | prettier                            | 3.9.10                                |                                                                                                                                             |
+| Runtime   | Node.js                             | ambiente local: 24.21.0 (npm 11.19.0) | Definir na Fase 1: Node 24 LTS (ou 22 LTS) em `engines`, `.nvmrc` e no CI.                                                                  |
 
 Plugins do Fastify previstos (versões a confirmar na Fase 1): `@fastify/helmet`, `@fastify/cors`, `@fastify/rate-limit`, `@fastify/swagger`.
 
@@ -168,17 +168,17 @@ Todos os pesos, limiares e a base de incerteza ficam em `backend/src/config/risk
 
 ## 6. Riscos técnicos
 
-| Risco | Probabilidade | Impacto | Mitigação |
-|---|---|---|---|
-| Prazo: 30 dias para escopo de 11 fases com quatro pessoas | Alta | Alto | Corte de MVP (ver `roadmap.md`). Gates de qualidade ao fim de cada bloco. |
-| Regras oficiais do Hack Brasil 2026 não verificadas | Alta | Médio | Pesquisa não encontrou página oficial. Pedir o regulamento antes da Fase 11. |
-| Chaves externas dependem de contas do time (abuse.ch, Firecrawl, Resend, provedor de IA) | Média | Alto | Abrir as contas no início da Fase 1. Sem chave, o módulo cai no fallback. |
-| Firecrawl: créditos limitados e termos de uso das páginas | Média | Médio | Usar só páginas autorizadas, com cache e baixa frequência. |
-| Exposição da `service_role` | Baixa | Crítico | Chave só no servidor. Varredura de segredos no CI. Revisão em todo PR que toca em configuração. |
-| SSRF | Baixa (sem fetch de URL do usuário) | Crítico | Política de D6 e lista de domínios permitidos para saída de rede. |
-| Prompt injection via texto de feeds | Média | Médio | Separação de canais, saída em schema, referência obrigatória às evidências e classificação feita fora da IA. |
-| TypeScript 7 incompatível com ferramentas do ecossistema | Média | Baixo | Testar na Fase 1. Fallback para 5.x. |
-| Precisão e recall sem conjunto rotulado | Alta | Médio | Montar o conjunto de URLs rotuladas na Fase 9. Não declarar métricas sem executar o teste. |
+| Risco                                                                                    | Probabilidade                       | Impacto | Mitigação                                                                                                    |
+| ---------------------------------------------------------------------------------------- | ----------------------------------- | ------- | ------------------------------------------------------------------------------------------------------------ |
+| Prazo: 30 dias para escopo de 11 fases com quatro pessoas                                | Alta                                | Alto    | Corte de MVP (ver `roadmap.md`). Gates de qualidade ao fim de cada bloco.                                    |
+| Regras oficiais do Hack Brasil 2026 não verificadas                                      | Alta                                | Médio   | Pesquisa não encontrou página oficial. Pedir o regulamento antes da Fase 11.                                 |
+| Chaves externas dependem de contas do time (abuse.ch, Firecrawl, Resend, provedor de IA) | Média                               | Alto    | Abrir as contas no início da Fase 1. Sem chave, o módulo cai no fallback.                                    |
+| Firecrawl: créditos limitados e termos de uso das páginas                                | Média                               | Médio   | Usar só páginas autorizadas, com cache e baixa frequência.                                                   |
+| Exposição da `service_role`                                                              | Baixa                               | Crítico | Chave só no servidor. Varredura de segredos no CI. Revisão em todo PR que toca em configuração.              |
+| SSRF                                                                                     | Baixa (sem fetch de URL do usuário) | Crítico | Política de D6 e lista de domínios permitidos para saída de rede.                                            |
+| Prompt injection via texto de feeds                                                      | Média                               | Médio   | Separação de canais, saída em schema, referência obrigatória às evidências e classificação feita fora da IA. |
+| TypeScript 7 incompatível com ferramentas do ecossistema                                 | Confirmada                          | Baixo   | Resolvido na Fase 1: TypeScript 6.0.3 fixado. Ver `typescript-eslint` acima.                                 |
+| Precisão e recall sem conjunto rotulado                                                  | Alta                                | Médio   | Montar o conjunto de URLs rotuladas na Fase 9. Não declarar métricas sem executar o teste.                   |
 
 ---
 

@@ -1,0 +1,38 @@
+import { z } from 'zod';
+
+const DEFAULT_PORT = 3000;
+const DEFAULT_CORS_ORIGIN = 'http://localhost:5173';
+
+const envSchema = z.object({
+  NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
+  HOST: z.string().min(1).default('127.0.0.1'),
+  PORT: z.coerce.number().int().min(1).max(65535).default(DEFAULT_PORT),
+  LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent']).default('info'),
+  CORS_ORIGIN: z
+    .string()
+    .default(DEFAULT_CORS_ORIGIN)
+    .transform((value) =>
+      value
+        .split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean),
+    ),
+});
+
+export type Env = z.output<typeof envSchema>;
+
+/**
+ * Valida as variáveis de ambiente na inicialização.
+ * A mensagem de erro cita só os nomes das variáveis, nunca os valores,
+ * para não vazar segredos em logs.
+ */
+export function loadEnv(source: NodeJS.ProcessEnv = process.env): Env {
+  const result = envSchema.safeParse(source);
+
+  if (!result.success) {
+    const invalidas = result.error.issues.map((issue) => issue.path.join('.')).join(', ');
+    throw new Error(`Configuração inválida nas variáveis de ambiente: ${invalidas}`);
+  }
+
+  return result.data;
+}
