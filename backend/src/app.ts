@@ -6,9 +6,12 @@ import { criarOpcoesLogger } from './config/logger.js';
 import type { Env } from './config/env.js';
 import { criarAutenticadorSupabase } from './integrations/supabase/autenticador.js';
 import { criarLeitorAmeacasSupabase } from './integrations/supabase/leitor-ameacas.js';
+import { criarRepositorioScansSupabase } from './integrations/supabase/repositorio-scans.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
 import type { Autenticador } from './modules/auth/auth.types.js';
 import { healthRoutes } from './modules/health/health.routes.js';
+import type { RepositorioScans } from './modules/scanner/repositorio.js';
+import { scansRoutes } from './modules/scanner/scans.routes.js';
 import type { LeitorAmeacas } from './modules/threats/leitor.js';
 import { threatsRoutes } from './modules/threats/threats.routes.js';
 
@@ -27,6 +30,8 @@ interface OpcoesApp {
   autenticador?: Autenticador;
   /** Leitor do Threat Feed alternativo. Mesmo papel do autenticador: testes sem rede. */
   leitor?: LeitorAmeacas;
+  /** Repositório do scanner alternativo. Os testes usam uma versão em memória. */
+  repositorioScans?: RepositorioScans;
 }
 
 export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<FastifyInstance> {
@@ -36,6 +41,7 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
 
   const autenticador = opcoes.autenticador ?? criarAutenticadorSupabase(env);
   const leitor = opcoes.leitor ?? criarLeitorAmeacasSupabase(env);
+  const repositorioScans = opcoes.repositorioScans ?? criarRepositorioScansSupabase(env);
 
   await app.register(helmet);
   await app.register(cors, { origin: env.CORS_ORIGIN });
@@ -58,6 +64,11 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
   await app.register(healthRoutes, { prefix: PREFIXO_API });
   await app.register(authRoutes, { prefix: PREFIXO_API, autenticador });
   await app.register(threatsRoutes, { prefix: PREFIXO_API, autenticador, leitor });
+  await app.register(scansRoutes, {
+    prefix: PREFIXO_API,
+    autenticador,
+    repositorio: repositorioScans,
+  });
 
   return app;
 }

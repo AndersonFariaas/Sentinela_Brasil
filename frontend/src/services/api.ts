@@ -13,12 +13,50 @@ const perfilSchema = z.object({
 
 export type PerfilUsuario = z.infer<typeof perfilSchema>;
 
-/** Erro HTTP da API. A mensagem é para o log do desenvolvedor, não para o usuário. */
+/**
+ * Erro HTTP da API. A mensagem do Error é para o log do desenvolvedor.
+ * `detalhe` é a mensagem segura que o servidor devolve para o usuário (ex.: URL recusada).
+ */
 export class ErroApi extends Error {
-  constructor(readonly status: number) {
+  constructor(
+    readonly status: number,
+    readonly detalhe: string | null = null,
+  ) {
     super(`Falha na API: HTTP ${String(status)}`);
     this.name = 'ErroApi';
   }
+}
+
+const erroServidorSchema = z.object({ error: z.object({ message: z.string() }) });
+
+/** Lê a mensagem segura do corpo de erro, quando o servidor enviou uma. */
+export async function lerDetalheErro(resposta: Response): Promise<string | null> {
+  try {
+    const corpo: unknown = await resposta.json();
+    const erro = erroServidorSchema.safeParse(corpo);
+    return erro.success ? erro.data.error.message : null;
+  } catch {
+    return null;
+  }
+}
+
+/** Envia JSON autenticado (POST). Lança ErroApi com o detalhe do servidor quando houver. */
+export async function enviarJsonAutenticado(
+  caminho: string,
+  token: string,
+  corpo: unknown,
+): Promise<unknown> {
+  const resposta = await fetch(`${API_URL}${caminho}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(corpo),
+  });
+
+  if (!resposta.ok) {
+    throw new ErroApi(resposta.status, await lerDetalheErro(resposta));
+  }
+
+  return resposta.json();
 }
 
 /**

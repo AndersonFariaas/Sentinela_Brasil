@@ -1,0 +1,53 @@
+{
+  "versao": "1.0.0",
+  "descricao": "Pesos e limites do motor de risco. Valores propostos, a validar com o time (architecture.md §5.3).",
+  "incerteza": {
+    "pontuacaoSemEvidencia": 10,
+    "tetoSemReputacao": 39
+  },
+  "reputacao": {
+    "janelaRecenteDias": 90,
+    "fatorRecente": 1,
+    "fatorAntigo": 0.6,
+    "pontosPorConfiabilidade": 20,
+    "confiabilidadeMinimaConfirmacao": 4,
+    "pesoPorTipo": {
+      "url": 1,
+      "domain": 1,
+      "ip": 0.8
+    }
+  },
+  "estrutura": {
+    "limiarSuspeito": 40,
+    "comprimentoUrlLongo": 200,
+    "minimoRotulosSubdominio": 5,
+    "minimoHifens": 3,
+    "palavrasIsca": [
+      "login",
+      "verificar",
+      "verifica",
+      "conta",
+      "senha",
+      "banco",
+      "pix",
+      "atualizar",
+      "confirmar",
+      "seguranca",
+      "fatura",
+      "cartao",
+      "boleto",
+      "bloqueio"
+    ],
+    "tldsSuspeitos": ["zip", "mov", "top", "xyz", "click", "gq", "tk", "ml", "cf", "ga"],
+    "pesos": {
+      "ip_no_host": 40,
+      "dominio_punycode": 35,
+      "sem_tls": 15,
+      "subdominios_excessivos": 20,
+      "palavra_isca": 25,
+      "tld_suspeito": 20,
+      "url_longa": 10,
+      "hifens_excessivos": 10
+    }
+  }
+}
