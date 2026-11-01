@@ -4,7 +4,7 @@
 
 Plataforma de Cyber Threat Intelligence que reúne fontes públicas de segurança, analisa URLs suspeitas, classifica o risco com regras documentadas e explica o resultado com IA.
 
-**Status:** Fase 1 (configuração do projeto). Ainda não há telas de produto nem integrações externas.
+**Status:** Fase 4 (Threat Intelligence). Coleta ativa para a CISA KEV, com feed e detalhes no front.
 
 ## Requisitos
 
@@ -53,6 +53,17 @@ docs/       Arquitetura, banco, segurança, backlog e roadmap
 ```
 
 Documentação de decisões está em [docs/architecture.md](docs/architecture.md), [docs/database.md](docs/database.md) e [docs/security.md](docs/security.md).
+
+## Coleta de ameaças (Fase 4)
+
+As fontes são cadastradas na tabela `sources`. Hoje a coleta está ativa para a **CISA KEV** (feed público, sem chave). URLhaus e CERT.br ficam inativas até a chave correspondente ser configurada.
+
+```bash
+cd backend
+npm run ingestao   # exige SUPABASE_SERVICE_ROLE_KEY no .env da raiz (nunca versionar)
+```
+
+A saída é uma linha JSON por evento, sem segredos. O comando sai com código 1 se alguma fonte falhar.
 
 ## Licença
 
