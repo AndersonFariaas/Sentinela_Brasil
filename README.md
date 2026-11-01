@@ -67,4 +67,4 @@ A saída é uma linha JSON por evento, sem segredos. O comando sai com código 1
 
 ## Licença
 
-A definir (ver [docs/roadmap.md](docs/roadmap.md), decisão D-F).
+Distribuído sob a [licença MIT](LICENSE).
