@@ -10,7 +10,8 @@
     "start": "node --env-file-if-exists=../.env dist/server.js",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "test:integration": "vitest run --config vitest.integration.config.ts"
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "ingestao": "tsx --env-file-if-exists=../.env src/jobs/ingestao.ts"
   },
   "keywords": [],
   "author": "",
