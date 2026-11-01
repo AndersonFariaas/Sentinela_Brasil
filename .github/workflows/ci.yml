@@ -2,9 +2,10 @@ name: CI
 
 on:
   push:
-    branches: [main, develop, 'feature/**', 'fix/**', 'hotfix/**', 'chore/**']
+    branches: [main, develop, 'feature/**', 'feat/**', 'fix/**', 'hotfix/**', 'chore/**']
   pull_request:
-    branches: [main, develop]
+    # Inclui as bases de PRs empilhados (ex.: chore/** como base de feat/**).
+    branches: [main, develop, 'chore/**', 'feature/**', 'feat/**']
 
 permissions:
   contents: read
