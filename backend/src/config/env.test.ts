@@ -1,9 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import { loadEnv } from './env.js';
 
+const CONFIG_SUPABASE = {
+  SUPABASE_URL: 'https://projeto.supabase.co',
+  SUPABASE_ANON_KEY: 'chave-publica-de-teste',
+};
+
 describe('loadEnv', () => {
-  it('aplica valores padrão quando nenhuma variável é informada', () => {
-    const env = loadEnv({});
+  it('aplica valores padrão quando só as variáveis obrigatórias são informadas', () => {
+    const env = loadEnv(CONFIG_SUPABASE);
 
     expect(env).toEqual({
       NODE_ENV: 'development',
@@ -11,11 +16,13 @@ describe('loadEnv', () => {
       PORT: 3000,
       LOG_LEVEL: 'info',
       CORS_ORIGIN: ['http://localhost:5173'],
+      ...CONFIG_SUPABASE,
     });
   });
 
   it('converte PORT para número e separa as origens de CORS', () => {
     const env = loadEnv({
+      ...CONFIG_SUPABASE,
       PORT: '8080',
       CORS_ORIGIN: 'https://a.example.com, https://b.example.com',
     });
@@ -25,8 +32,18 @@ describe('loadEnv', () => {
   });
 
   it('rejeita PORT fora da faixa e cita só o nome da variável', () => {
-    expect(() => loadEnv({ PORT: '70000' })).toThrow(
+    expect(() => loadEnv({ ...CONFIG_SUPABASE, PORT: '70000' })).toThrow(
       'Configuração inválida nas variáveis de ambiente: PORT',
+    );
+  });
+
+  it('exige a URL do Supabase', () => {
+    expect(() => loadEnv({ SUPABASE_ANON_KEY: 'x' })).toThrow('SUPABASE_URL');
+  });
+
+  it('exige a chave pública do Supabase', () => {
+    expect(() => loadEnv({ SUPABASE_URL: 'https://projeto.supabase.co' })).toThrow(
+      'SUPABASE_ANON_KEY',
     );
   });
 
@@ -34,7 +51,7 @@ describe('loadEnv', () => {
     const valorSecreto = 'valor-que-nao-pode-vazar';
 
     try {
-      loadEnv({ LOG_LEVEL: valorSecreto });
+      loadEnv({ ...CONFIG_SUPABASE, LOG_LEVEL: valorSecreto });
       expect.unreachable('loadEnv deveria ter lançado erro');
     } catch (error) {
       expect(String(error)).not.toContain(valorSecreto);

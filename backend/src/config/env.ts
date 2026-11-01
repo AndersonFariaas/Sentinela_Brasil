@@ -17,6 +17,9 @@ const envSchema = z.object({
         .map((origin) => origin.trim())
         .filter(Boolean),
     ),
+  SUPABASE_URL: z.url(),
+  // Chave pública (anon). Segura para uso no servidor, mas nunca dá acesso além da RLS.
+  SUPABASE_ANON_KEY: z.string().min(1),
 });
 
 export type Env = z.output<typeof envSchema>;
