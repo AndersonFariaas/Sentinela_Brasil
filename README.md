@@ -4,7 +4,7 @@
 
 Plataforma de Cyber Threat Intelligence que reúne fontes públicas de segurança, analisa URLs suspeitas, classifica o risco com regras documentadas e explica o resultado com IA.
 
-**Status:** Fase 4 (Threat Intelligence). Coleta ativa para a CISA KEV, com feed e detalhes no front.
+**Status:** Fase 5 (Detector de phishing). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas e resultado verificável no front.
 
 ## Requisitos
 
@@ -64,6 +64,15 @@ npm run ingestao   # exige SUPABASE_SERVICE_ROLE_KEY no .env da raiz (nunca vers
 ```
 
 A saída é uma linha JSON por evento, sem segredos. O comando sai com código 1 se alguma fonte falhar.
+
+## Detector de URLs (Fase 5)
+
+`POST /api/v1/scans` recebe `{ "url": "https://..." }` e devolve classificação (`confirmado`, `suspeito` ou `nao_identificado`), pontuação de 0 a 100, nível de risco, evidências e fontes consultadas. `GET /api/v1/scans/:id` lê um resultado salvo. Os dois exigem login.
+
+- O servidor **não acessa** a URL informada. A análise é feita só na string.
+- Endereços internos, privados e com usuário e senha são recusados antes de qualquer consulta.
+- Pesos e limites ficam em [backend/src/config/risk-rules.json](backend/src/config/risk-rules.json), com versão gravada em cada resultado.
+- A reputação usa só os indicadores já coletados. Sem a URLhaus ativa, a maioria dos resultados fica em `nao_identificado`, e a pontuação fica limitada a 39.
 
 ## Licença
 

@@ -20,6 +20,10 @@ const envSchema = z.object({
   SUPABASE_URL: z.url(),
   // Chave pública (anon). Segura para uso no servidor, mas nunca dá acesso além da RLS.
   SUPABASE_ANON_KEY: z.string().min(1),
+  // IA (Fase 6). Sem chave, o analista usa só o texto determinístico. Nunca vai para o front.
+  ANTHROPIC_API_KEY: z.string().min(1).optional(),
+  IA_MODELO: z.string().min(1).optional(),
+  IA_TIMEOUT_MS: z.coerce.number().int().min(1000).max(60000).optional(),
 });
 
 export type Env = z.output<typeof envSchema>;
