@@ -34,6 +34,7 @@ const explicacaoSchema = z.object({
   resumo: z.string(),
   justificativa: z.string(),
   recomendacoes: z.array(z.string()),
+  evidenciasCitadas: z.array(z.string()).default([]),
 });
 
 const linhaIndicadorSchema = z.object({
@@ -54,7 +55,17 @@ const linhaScanSchema = z.object({
   sources_consulted: z.array(fonteSchema),
   algorithm_version: z.string(),
   created_at: z.string(),
-  analyses: z.array(z.object({ ai_status: z.string(), content: explicacaoSchema })).min(1),
+  analyses: z
+    .array(
+      z.object({
+        ai_status: z.enum(['ok', 'fallback', 'erro']),
+        provider: z.string(),
+        model: z.string().nullable(),
+        prompt_version: z.string(),
+        content: explicacaoSchema,
+      }),
+    )
+    .min(1),
 });
 
 function garantirSemErro(erro: { message: string } | null, contexto: string): void {
@@ -117,11 +128,14 @@ export function criarRepositorioScansSupabase(config: ConfigSupabase): Repositor
         p_evidence: analise.evidencias.map((evidencia) => ({ ...evidencia })),
         p_sources_consulted: analise.fontes.map((fonte) => ({ ...fonte })),
         p_algorithm_version: analise.versaoAlgoritmo,
-        p_ai_status: 'fallback',
-        p_provider: 'deterministico',
-        p_model: null,
-        p_prompt_version: 'fallback-1',
-        p_analysis_content: { ...analise.explicacao },
+        p_ai_status: analise.analiseIa.status,
+        p_provider: analise.analiseIa.provedor,
+        p_model: analise.analiseIa.modelo,
+        p_prompt_version: analise.analiseIa.versaoPrompt,
+        p_analysis_content: {
+          ...analise.explicacao,
+          evidenciasCitadas: analise.analiseIa.evidenciasCitadas,
+        },
       });
       garantirSemErro(error, 'Falha ao registrar o escaneamento');
 
@@ -133,7 +147,7 @@ export function criarRepositorioScansSupabase(config: ConfigSupabase): Repositor
       const { data, error } = await cliente
         .from('scans')
         .select(
-          'id, url, host, classification, risk_score, risk_level, evidence, sources_consulted, algorithm_version, created_at, analyses(ai_status, content)',
+          'id, url, host, classification, risk_score, risk_level, evidence, sources_consulted, algorithm_version, created_at, analyses(ai_status, provider, model, prompt_version, content)',
         )
         .eq('id', id)
         .maybeSingle();
@@ -161,8 +175,18 @@ export function criarRepositorioScansSupabase(config: ConfigSupabase): Repositor
         evidencias: linha.evidence,
         fontes: linha.sources_consulted,
         versaoAlgoritmo: linha.algorithm_version,
-        statusIa: analise.ai_status,
-        explicacao: analise.content,
+        analiseIa: {
+          status: analise.ai_status === 'ok' ? 'ok' : 'fallback',
+          provedor: analise.provider,
+          modelo: analise.model,
+          versaoPrompt: analise.prompt_version,
+          evidenciasCitadas: analise.content.evidenciasCitadas,
+        },
+        explicacao: {
+          resumo: analise.content.resumo,
+          justificativa: analise.content.justificativa,
+          recomendacoes: analise.content.recomendacoes,
+        },
       };
 
       return resultado;

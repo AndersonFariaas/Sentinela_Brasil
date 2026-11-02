@@ -13,6 +13,15 @@ export interface CandidatoReputacao {
   valor: string;
 }
 
+/** Como a explicação foi gerada. Fica gravada junto da análise, para auditoria. */
+export interface RegistroAnaliseIa {
+  status: 'ok' | 'fallback';
+  provedor: string;
+  modelo: string | null;
+  versaoPrompt: string;
+  evidenciasCitadas: string[];
+}
+
 export interface NovaAnalise {
   url: string;
   normalizedUrl: string;
@@ -24,6 +33,7 @@ export interface NovaAnalise {
   evidencias: Evidencia[];
   fontes: FonteConsultada[];
   explicacao: Explicacao;
+  analiseIa: RegistroAnaliseIa;
 }
 
 export interface AnaliseRegistrada {
@@ -37,7 +47,7 @@ export interface AnaliseRegistrada {
   evidencias: Evidencia[];
   fontes: FonteConsultada[];
   versaoAlgoritmo: string;
-  statusIa: string;
+  analiseIa: RegistroAnaliseIa;
   explicacao: Explicacao;
 }
 

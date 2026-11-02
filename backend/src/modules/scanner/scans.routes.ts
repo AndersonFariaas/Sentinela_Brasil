@@ -1,18 +1,30 @@
 import { createHash } from 'node:crypto';
-import type { FastifyPluginCallback, FastifyRequest } from 'fastify';
+import type { FastifyBaseLogger, FastifyPluginCallback, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { exigirUsuario, extrairTokenBearer, obterSessao } from '../auth/auth.guard.js';
 import type { Autenticador } from '../auth/auth.types.js';
 import { REGRAS_RISCO } from './regras.js';
-import type { AnaliseRegistrada, RepositorioScans } from './repositorio.js';
+import type { AnaliseRegistrada, RegistroAnaliseIa, RepositorioScans } from './repositorio.js';
 import { analisarUrl } from './analisador.js';
 import { validarUrlEntrada, type MotivoRejeicao } from './validacao.js';
-import type { ResultadoAnalise } from './tipos.js';
+import type { Explicacao, ResultadoAnalise } from './tipos.js';
+import { analisarComIa, type OpcoesAnaliseIa } from '../ai-analyst/analista.js';
 
 interface OpcoesScansRoutes {
   autenticador: Autenticador;
   repositorio: RepositorioScans;
+  ia: OpcoesAnaliseIa;
 }
+
+const VERSAO_FALLBACK = 'fallback-1';
+
+const REGISTRO_SEM_IA: RegistroAnaliseIa = {
+  status: 'fallback',
+  provedor: 'deterministico',
+  modelo: null,
+  versaoPrompt: VERSAO_FALLBACK,
+  evidenciasCitadas: [],
+};
 
 const corpoAnaliseSchema = z.object({ url: z.string() });
 const parametroIdSchema = z.object({ id: z.uuid() });
@@ -51,10 +63,10 @@ function serializarAnalise(analise: {
   host: string;
   criadaEm: string;
   versaoAlgoritmo: string;
-  statusIa: string;
+  analiseIa: RegistroAnaliseIa;
   resultado: ResultadoAnalise;
 }) {
-  const { resultado } = analise;
+  const { resultado, analiseIa } = analise;
 
   return {
     id: analise.id,
@@ -67,16 +79,57 @@ function serializarAnalise(analise: {
     evidencias: resultado.evidencias,
     fontes: resultado.fontes,
     analise: {
-      status: analise.statusIa,
+      status: analiseIa.status,
+      modelo: analiseIa.modelo,
+      evidenciasCitadas: analiseIa.evidenciasCitadas,
       ...resultado.explicacao,
     },
     algoritmo: analise.versaoAlgoritmo,
   };
 }
 
+/**
+ * Usa a explicação da IA só quando ela passou na validação. Em qualquer outro caso,
+ * mantém o texto determinístico. O motivo da falha vai para o log, nunca para o usuário.
+ */
+async function explicarResultado(
+  ia: OpcoesAnaliseIa,
+  resultado: ResultadoAnalise,
+  host: string,
+  log: FastifyBaseLogger,
+): Promise<{ explicacao: Explicacao; registroIa: RegistroAnaliseIa }> {
+  const respostaIa = await analisarComIa(ia, {
+    classificacao: resultado.classificacao,
+    pontuacao: resultado.pontuacao,
+    nivel: resultado.nivel,
+    host,
+    evidencias: resultado.evidencias,
+    fontes: resultado.fontes,
+  });
+
+  if (respostaIa.status === 'ok') {
+    const { evidenciasCitadas, ...explicacao } = respostaIa.explicacao;
+    return {
+      explicacao,
+      registroIa: {
+        status: 'ok',
+        provedor: respostaIa.provedor,
+        modelo: respostaIa.modelo,
+        versaoPrompt: respostaIa.versaoPrompt,
+        evidenciasCitadas,
+      },
+    };
+  }
+
+  if (respostaIa.motivo !== 'desativada') {
+    log.warn({ motivoIa: respostaIa.motivo }, 'análise sem IA: texto determinístico');
+  }
+  return { explicacao: resultado.explicacao, registroIa: REGISTRO_SEM_IA };
+}
+
 export const scansRoutes: FastifyPluginCallback<OpcoesScansRoutes> = (
   app,
-  { autenticador, repositorio },
+  { autenticador, repositorio, ia },
   done,
 ) => {
   const protegida = { preHandler: exigirUsuario(autenticador) };
@@ -100,29 +153,38 @@ export const scansRoutes: FastifyPluginCallback<OpcoesScansRoutes> = (
 
     const { accessToken } = obterSessao(request);
     const { normalizada, host } = validacao;
-    const resultado = await analisarUrl(
+    const resultadoMotor = await analisarUrl(
       { normalizada, host },
       repositorio,
       accessToken,
       REGRAS_RISCO,
     );
+    const { explicacao, registroIa } = await explicarResultado(
+      ia,
+      resultadoMotor,
+      host,
+      request.log,
+    );
+    const resultado: ResultadoAnalise = { ...resultadoMotor, explicacao };
+    const url = corpo.data.url.trim();
 
     const id = await repositorio.registrarAnalise(accessToken, {
-      url: corpo.data.url.trim(),
+      url,
       normalizedUrl: normalizada,
       host,
       versaoAlgoritmo: REGRAS_RISCO.versao,
       ...resultado,
+      analiseIa: registroIa,
     });
 
     return reply.status(201).send(
       serializarAnalise({
         id,
-        url: corpo.data.url.trim(),
+        url,
         host,
         criadaEm: new Date().toISOString(),
         versaoAlgoritmo: REGRAS_RISCO.versao,
-        statusIa: 'fallback',
+        analiseIa: registroIa,
         resultado,
       }),
     );
@@ -151,7 +213,7 @@ export const scansRoutes: FastifyPluginCallback<OpcoesScansRoutes> = (
       host: analise.host,
       criadaEm: analise.criadaEm,
       versaoAlgoritmo: analise.versaoAlgoritmo,
-      statusIa: analise.statusIa,
+      analiseIa: analise.analiseIa,
       resultado: {
         classificacao: analise.classificacao,
         pontuacao: analise.pontuacao,
