@@ -33,6 +33,7 @@ describe('analisarCatalogoKev', () => {
         urlFonte: URL_CATALOGO_KEV,
         publicadoEm: '2025-03-10T00:00:00.000Z',
         indicadores: [{ tipo: 'cve', valor: 'CVE-2025-0001' }],
+        verificada: true,
       },
     ]);
   });

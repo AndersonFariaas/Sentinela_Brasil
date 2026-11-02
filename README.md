@@ -4,7 +4,7 @@
 
 Plataforma de Cyber Threat Intelligence que reúne fontes públicas de segurança, analisa URLs suspeitas, classifica o risco com regras documentadas e explica o resultado com IA.
 
-**Status:** Fase 6 (Análise por IA). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas, explicação por IA com fallback e resultado verificável no front.
+**Status:** Fase 7 (Alertas por e-mail). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas, explicação por IA com fallback e alertas por e-mail via Resend.
 
 ## Requisitos
 
@@ -82,6 +82,17 @@ A explicação do resultado é gerada pela Anthropic. A classificação e a pont
 - Só o host e as evidências são enviados ao modelo. A URL completa fica no servidor.
 - Resposta fora do contrato, ou que contradiz o motor, é descartada. Nesse caso, e sem `ANTHROPIC_API_KEY`, o texto vem das regras (`ai_status = fallback`).
 - Limite de 20 análises por minuto por sessão (token de login), em memória do processo.
+
+## Alertas por e-mail (Fase 7)
+
+Quando uma ameaça verificada entra no banco, a coleta cria um alerta para cada usuário inscrito na categoria e envia o e-mail pela Resend. Hoje, a única fonte que verifica ameaças é a CISA KEV.
+
+- O gatilho é o próprio `npm run ingestao`, logo após a coleta. Não há agendador: quem roda a coleta também dispara os alertas.
+- Sem `RESEND_API_KEY` no `.env`, a coleta roda normalmente e os alertas ficam desativados.
+- `ALERTA_REMETENTE` é opcional. O padrão, `onboarding@resend.dev`, só envia para o e-mail da conta Resend. Para enviar a outros destinatários, verifique um domínio na Resend e use um remetente desse domínio.
+- Não há duplicidade: cada alerta tem chave única no banco e a mesma chave de idempotência na Resend. A Resend guarda essa chave por 24 horas. Repetir a execução não reenvia.
+- Até três tentativas por alerta. Erro de chave, de remetente ou de dados não é repetido.
+- **Limitação:** ainda não há link de cancelamento nem tela de inscrições (FE-011). Antes de enviar a usuários reais, isso precisa existir.
 
 ## Licença
 

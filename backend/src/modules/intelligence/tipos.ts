@@ -34,6 +34,8 @@ export interface AmeacaColetada {
   urlFonte: string | null;
   publicadoEm: string | null;
   indicadores: IndicadorColetado[];
+  /** A própria fonte confirma a ameaça. Só ameaças verificadas geram alerta (ALR-003). */
+  verificada?: boolean;
 }
 
 export interface ResultadoColeta {

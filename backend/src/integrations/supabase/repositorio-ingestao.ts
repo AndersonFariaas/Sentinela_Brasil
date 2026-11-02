@@ -72,6 +72,8 @@ function montarLinha(ameaca: AmeacaColetada, fonteId: string, agora: string): Am
     source_url: ameaca.urlFonte,
     published_at: ameaca.publicadoEm,
     last_verified_at: agora,
+    // Ausência do campo não altera o status já gravado, para não desfazer curadoria manual.
+    ...(ameaca.verificada ? { verification_status: 'verificada' } : {}),
   };
 }
 
