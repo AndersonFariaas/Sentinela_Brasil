@@ -2,14 +2,15 @@
 
 As migrations em `migrations/` são a fonte da verdade do schema. Elas são aplicadas em ordem numérica.
 
-| Arquivo                                   | Conteúdo                                                                                      |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------- |
-| `0001_profiles_and_roles.sql`             | `profiles`, trigger de cadastro, `is_admin()` e privilégio de coluna que protege o papel      |
-| `0002_threat_intelligence_data.sql`       | `sources`, `threats`, `indicators`, `threat_indicators`, `threat_revisions`, `ingestion_runs` |
-| `0003_user_data_and_audit.sql`            | `scans`, `analyses`, `alerts`, `subscriptions`, `audit_log`                                   |
-| `0004_private_helpers_and_fk_indexes.sql` | Move `is_admin()` para o schema `private` (fora da API) e indexa FKs                          |
-| `0005_seed_threat_sources.sql`            | Fontes iniciais: CISA KEV (ativa), URLhaus e CERT.br (inativas até termos e chave)            |
-| `0006_scan_registration.sql`              | `registrar_escaneamento()`: grava scan e análise para `auth.uid()`, sem service_role na API   |
+| Arquivo                                   | Conteúdo                                                                                        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `0001_profiles_and_roles.sql`             | `profiles`, trigger de cadastro, `is_admin()` e privilégio de coluna que protege o papel        |
+| `0002_threat_intelligence_data.sql`       | `sources`, `threats`, `indicators`, `threat_indicators`, `threat_revisions`, `ingestion_runs`   |
+| `0003_user_data_and_audit.sql`            | `scans`, `analyses`, `alerts`, `subscriptions`, `audit_log`                                     |
+| `0004_private_helpers_and_fk_indexes.sql` | Move `is_admin()` para o schema `private` (fora da API) e indexa FKs                            |
+| `0005_seed_threat_sources.sql`            | Fontes iniciais: CISA KEV (ativa), URLhaus e CERT.br (inativas até termos e chave)              |
+| `0006_scan_registration.sql`              | `registrar_escaneamento()`: grava scan e análise para `auth.uid()`, sem service_role na API     |
+| `0007_cancelar_inscricao.sql`             | `cancelar_inscricao()`: desativa uma inscrição pelo id, para o link do e-mail, sem service_role |
 
 ## Como aplicar
 

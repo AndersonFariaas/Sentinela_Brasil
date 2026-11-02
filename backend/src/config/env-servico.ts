@@ -4,6 +4,12 @@ const envServicoSchema = z.object({
   SUPABASE_URL: z.url(),
   // Chave com acesso total ao banco. Só o servidor pode ler esta variável.
   SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
+  // Opcionais: sem a chave da Resend, a coleta roda e os alertas ficam desativados.
+  // O job trata chave vazia como ausente, porque o .env costuma trazer a linha sem valor.
+  RESEND_API_KEY: z.string().optional(),
+  ALERTA_REMETENTE: z.string().optional(),
+  // Base pública da API, usada no link de cancelamento. Sem ela, o alerta não é enviado.
+  URL_PUBLICA_API: z.string().optional(),
 });
 
 export type EnvServico = z.output<typeof envServicoSchema>;

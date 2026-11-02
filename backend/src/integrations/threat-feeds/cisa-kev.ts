@@ -49,6 +49,8 @@ function mapearItem(item: ItemKev): AmeacaColetada {
     urlFonte: URL_CATALOGO_KEV,
     publicadoEm: `${item.dateAdded}T00:00:00.000Z`,
     indicadores: [{ tipo: 'cve', valor: item.cveID }],
+    // A CISA só inclui vulnerabilidades com exploração confirmada.
+    verificada: true,
   };
 }
 

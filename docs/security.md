@@ -19,7 +19,7 @@ Alvo: controles de OWASP ASVS no nível 2 e mitigação dos riscos do OWASP Top 
 | Explicação por IA             | Prompt injection vindo de feeds ou da URL | Separação de canais, saída em schema, classificação fora da IA          | Implementado (Fase 6)  |
 | Integridade da classificação  | Manipulação de pesos ou de regras         | Regras em arquivo versionado, testes de caso, versão salva em cada scan | Planejado (Fase 5)     |
 | Disponibilidade e custo       | Abuso do endpoint de IA e do scanner      | Rate limit por IP e por usuário, limite de tokens                       | Planejado (Fase 1 e 6) |
-| Spam pelo sistema de e-mail   | Uso do envio para terceiros               | Envio só para inscritos verificados, sem endpoint de e-mail livre       | Planejado (Fase 7)     |
+| Spam pelo sistema de e-mail   | Uso do envio para terceiros               | Envio só para inscritos verificados, sem endpoint de e-mail livre       | Implementado (Fase 7)  |
 | Dados pessoais                | Retenção excessiva, vazamento em log      | Minimização, retenção (`database.md` §6), redaction de logs             | Planejado (Fase 2)     |
 
 ---

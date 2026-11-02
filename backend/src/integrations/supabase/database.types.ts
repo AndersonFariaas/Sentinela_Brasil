@@ -509,6 +509,10 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      cancelar_inscricao: {
+        Args: { p_inscricao_id: string };
+        Returns: undefined;
+      };
       registrar_escaneamento: {
         Args: {
           p_url: string;

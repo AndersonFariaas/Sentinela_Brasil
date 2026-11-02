@@ -1,22 +1,59 @@
-import { loadEnvServico } from '../config/env-servico.js';
+import { loadEnvServico, type EnvServico } from '../config/env-servico.js';
+import { criarProvedorEmailResend } from '../integrations/resend/cliente-resend.js';
 import { criarClienteServico } from '../integrations/supabase/clientes-servico.js';
+import type { ClienteSupabase } from '../integrations/supabase/clientes.js';
+import { criarRepositorioAlertas } from '../integrations/supabase/repositorio-alertas.js';
 import { criarRepositorioIngestao } from '../integrations/supabase/repositorio-ingestao.js';
 import { criarAdaptador } from '../integrations/threat-feeds/registro-adaptadores.js';
-import { executarIngestao } from '../modules/intelligence/ingestao.service.js';
+import { dispararAlertas } from '../modules/alerts/alertas.service.js';
+import { executarIngestao, type Registrador } from '../modules/intelligence/ingestao.service.js';
+
+const registrar: Registrador = (evento, dados) => {
+  console.log(JSON.stringify({ evento, ...dados, em: new Date().toISOString() }));
+};
 
 /**
- * Coleta as fontes ativas e grava no banco. Uma linha JSON por evento, sem segredos.
+ * Sem chave da Resend ou sem a URL pública da API, os alertas ficam desativados e a coleta segue.
+ * Sem a URL, o e-mail sairia sem link de cancelamento, então não sai.
+ */
+async function enviarAlertas(env: EnvServico, cliente: ClienteSupabase): Promise<void> {
+  const chave = env.RESEND_API_KEY?.trim();
+  if (!chave) {
+    registrar('alertas.desativados', { motivo: 'RESEND_API_KEY ausente' });
+    return;
+  }
+
+  const urlPublicaApi = env.URL_PUBLICA_API?.trim();
+  if (!urlPublicaApi) {
+    registrar('alertas.desativados', { motivo: 'URL_PUBLICA_API ausente' });
+    return;
+  }
+
+  await dispararAlertas(criarRepositorioAlertas(cliente), {
+    provedor: criarProvedorEmailResend({
+      apiKey: chave,
+      remetente: env.ALERTA_REMETENTE || undefined,
+    }),
+    urlPublicaApi,
+    agora: new Date(),
+    registrar,
+  });
+}
+
+/**
+ * Coleta as fontes ativas, grava no banco e envia os alertas das ameaças novas.
  * Execução: npm run ingestao (dentro de backend/). Sai com código 1 se alguma fonte falhar.
  */
 async function main(): Promise<void> {
   const env = loadEnvServico();
-  const repositorio = criarRepositorioIngestao(criarClienteServico(env));
+  const cliente = criarClienteServico(env);
+  const repositorio = criarRepositorioIngestao(cliente);
 
-  const resumos = await executarIngestao(repositorio, criarAdaptador, (evento, dados) => {
-    console.log(JSON.stringify({ evento, ...dados, em: new Date().toISOString() }));
-  });
+  const resumos = await executarIngestao(repositorio, criarAdaptador, registrar);
 
   console.log(JSON.stringify({ evento: 'ingestao.concluida', fontes: resumos }));
+
+  await enviarAlertas(env, cliente);
 
   if (resumos.some((resumo) => resumo.status === 'erro')) {
     process.exitCode = 1;

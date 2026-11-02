@@ -8,6 +8,11 @@ import type { Env } from './config/env.js';
 import { criarAutenticadorSupabase } from './integrations/supabase/autenticador.js';
 import { criarLeitorAmeacasSupabase } from './integrations/supabase/leitor-ameacas.js';
 import { criarRepositorioScansSupabase } from './integrations/supabase/repositorio-scans.js';
+import { criarCancelarInscricaoSupabase } from './integrations/supabase/cancelamento-supabase.js';
+import {
+  cancelamentoRoutes,
+  type CancelarInscricao,
+} from './modules/alerts/cancelamento.routes.js';
 import { criarProvedorIaPadrao, TIMEOUT_IA_PADRAO_MS } from './integrations/ia/anthropic.js';
 import type { ProvedorIa } from './modules/ai-analyst/provedor.js';
 import { authRoutes } from './modules/auth/auth.routes.js';
@@ -37,6 +42,8 @@ interface OpcoesApp {
   repositorioScans?: RepositorioScans;
   /** Provedor de IA alternativo. Null força o texto determinístico (testes e ambientes sem chave). */
   provedorIa?: ProvedorIa | null;
+  /** Cancelamento de inscrição alternativo. Os testes usam uma versão em memória. */
+  cancelarInscricao?: CancelarInscricao;
 }
 
 export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<FastifyInstance> {
@@ -78,6 +85,10 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
     autenticador,
     repositorio: repositorioScans,
     ia: { provedor: provedorIa, timeoutMs: env.IA_TIMEOUT_MS ?? TIMEOUT_IA_PADRAO_MS },
+  });
+  await app.register(cancelamentoRoutes, {
+    prefix: PREFIXO_API,
+    cancelar: opcoes.cancelarInscricao ?? criarCancelarInscricaoSupabase(env),
   });
 
   return app;
