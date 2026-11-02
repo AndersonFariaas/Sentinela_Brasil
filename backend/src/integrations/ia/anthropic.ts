@@ -61,7 +61,7 @@ function traduzirErro(falha: unknown, signal: AbortSignal): ErroProvedorIa {
 }
 
 /** Modelo padrão do analista. Troque por IA_MODELO só com decisão do time. */
-export const MODELO_IA_PADRAO = 'claude-opus-5-5';
+export const MODELO_IA_PADRAO = 'claude-haiku-5-5';
 export const TIMEOUT_IA_PADRAO_MS = 15_000;
 
 /** Sem chave, devolve null: o analista responde só com o texto determinístico. */
