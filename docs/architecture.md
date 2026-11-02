@@ -48,7 +48,7 @@ Versões consultadas no npm em 31/10/2026. Na Fase 1, a versão exata fica fixad
 | Frontend  | @supabase/supabase-js               | 2.118.0                               | Cliente com a chave pública (anon) apenas.                                                                                                  |
 | Backend   | fastify                             | 5.12.7                                | Logger pino já vem embutido, com redaction de campos sensíveis.                                                                             |
 | Backend   | zod                                 | 4.6.7                                 | Validação de entrada e de respostas de IA e de feeds.                                                                                       |
-| Backend   | resend                              | 6.37.0                                | Envio de e-mail com chave de idempotência.                                                                                                  |
+| Backend   | resend                              | 6.34.1                                | Envio de e-mail com chave de idempotência.                                                                                                  |
 | Qualidade | typescript                          | 6.0.3 (fixada exata)                  | Não usar a 7: o `typescript-eslint` 8.72.1 aceita TypeScript só abaixo de 6.1.0 (verificado na Fase 1). Revisar quando o lint suportar a 7. |
 | Qualidade | vitest                              | 5.0.5                                 | Testes unitários e de integração.                                                                                                           |
 | Qualidade | eslint                              | 10.14.0                               |                                                                                                                                             |
@@ -161,7 +161,7 @@ Todos os pesos, limiares e a base de incerteza ficam em `backend/src/config/risk
 
 1. Quando uma ameaça nova ou atualizada entra no banco, o serviço procura as inscrições (`subscriptions`) de categoria correspondente e com `enabled = true`.
 2. Para cada destinatário, cria um registro em `alerts` com chave de idempotência `alert:{user_id}:{threat_id}:{alert_type}`. A restrição `UNIQUE` no banco impede duplicidade mesmo se o job rodar duas vezes.
-3. O envio usa a Resend com o mesmo valor como `idempotencyKey`. A Resend documenta essa chave para `POST /emails` e `POST /emails/batch`. A janela de validade da chave deve ser conferida na documentação antes da implementação.
+3. O envio usa a Resend com o mesmo valor como `idempotencyKey`. A Resend documenta essa chave para `POST /emails` e `POST /emails/batch`. A janela de validade é de 24 horas, conforme a documentação da Resend (conferida em 02/11/2026).
 4. Falhas são registradas em `delivery_status` com até três tentativas. Erros guardam só o resumo, sem chaves ou conteúdo sensível.
 
 ---

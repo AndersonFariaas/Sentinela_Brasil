@@ -4,7 +4,7 @@
 
 Plataforma de Cyber Threat Intelligence que reúne fontes públicas de segurança, analisa URLs suspeitas, classifica o risco com regras documentadas e explica o resultado com IA.
 
-**Status:** Fase 5 (Detector de phishing). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas e resultado verificável no front.
+**Status:** Fase 6 (Análise por IA). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas, explicação por IA com fallback e resultado verificável no front.
 
 ## Requisitos
 
@@ -73,6 +73,15 @@ A saída é uma linha JSON por evento, sem segredos. O comando sai com código 1
 - Endereços internos, privados e com usuário e senha são recusados antes de qualquer consulta.
 - Pesos e limites ficam em [backend/src/config/risk-rules.json](backend/src/config/risk-rules.json), com versão gravada em cada resultado.
 - A reputação usa só os indicadores já coletados. Sem a URLhaus ativa, a maioria dos resultados fica em `nao_identificado`, e a pontuação fica limitada a 39.
+
+## Análise por IA (Fase 6)
+
+A explicação do resultado é gerada pela Anthropic. A classificação e a pontuação vêm sempre do motor de regras.
+
+- Modelo padrão: `claude-haiku-5-5`. Para trocar, defina `IA_MODELO` no `.env` do servidor.
+- Só o host e as evidências são enviados ao modelo. A URL completa fica no servidor.
+- Resposta fora do contrato, ou que contradiz o motor, é descartada. Nesse caso, e sem `ANTHROPIC_API_KEY`, o texto vem das regras (`ai_status = fallback`).
+- Limite de 20 análises por minuto por sessão (token de login), em memória do processo.
 
 ## Licença
 

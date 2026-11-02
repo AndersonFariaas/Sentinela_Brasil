@@ -127,6 +127,6 @@ Cada decisão tem a recomendação que eu faria. Responda o que mudar e eu ajust
 - Limites de créditos e de uso das contas Firecrawl, Resend e provedor de IA. Dependem do plano de cada conta.
 - Termos de uso do CERT.br e da CISA para uso comercial ou de redistribuição. A CISA publica o KEV como dado público. Os termos do CERT.br precisam de leitura direta antes do G2.
 - Requisitos de Node dos pacotes na versão escolhida. Conferir na Fase 1.
-- Janela de validade da chave de idempotência da Resend. Conferir antes do G4.
+- Janela de validade da chave de idempotência da Resend: 24 horas, conforme a documentação oficial (conferida em 02/11/2026).
 
 Os valores de versão em `architecture.md` foram consultados no npm em 31/10/2026. Nenhum pacote foi instalado nem testado ainda.
