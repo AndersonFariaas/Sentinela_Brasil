@@ -3,7 +3,9 @@
 name: Varredura do histórico
 
 on:
-  workflow_dispatch:
+  # Disparo temporário: roda no push deste branch. Remover antes do merge.
+  push:
+    branches: [chore/varredura-historico]
 
 permissions:
   contents: read
