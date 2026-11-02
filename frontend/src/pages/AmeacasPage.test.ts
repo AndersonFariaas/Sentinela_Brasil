@@ -52,7 +52,7 @@ describe('AmeacasPage', () => {
   it('lista as ameaças recebidas da API', async () => {
     vi.mocked(listarAmeacas).mockResolvedValue({
       itens: [AMEACA_FALSA],
-      pagina: 0,
+      pagina: 1,
       limite: 20,
       temMais: false,
     });
@@ -68,7 +68,7 @@ describe('AmeacasPage', () => {
   it('mostra estado vazio sem filtros quando não há ameaças', async () => {
     vi.mocked(listarAmeacas).mockResolvedValue({
       itens: [],
-      pagina: 0,
+      pagina: 1,
       limite: 20,
       temMais: false,
     });
@@ -91,7 +91,7 @@ describe('AmeacasPage', () => {
   it('oferece carregar mais quando existe próxima página', async () => {
     vi.mocked(listarAmeacas).mockResolvedValue({
       itens: [AMEACA_FALSA],
-      pagina: 0,
+      pagina: 1,
       limite: 20,
       temMais: true,
     });

@@ -117,9 +117,9 @@ Somente leitura. Os dados vêm das fontes coletadas pelo job diário (hoje, a CI
 | `categoria`  | —      | `phishing`, `malware`, `ransomware`, `malicious_domain`, `suspicious_url`, `digital_fraud`, `exploited_vulnerability` |
 | `severidade` | —      | `baixo`, `moderado`, `alto`, `critico`                                                                                |
 | `limite`     | `20`   | De 1 a 100                                                                                                            |
-| `pagina`     | `0`    | A partir de 0 (começa em 0)                                                                                           |
+| `pagina`     | `1`    | A partir de 1 (começa em 1)                                                                                           |
 
-Resposta: `{ "itens": [...], "pagina": 0, "limite": 20, "temMais": true }`.
+Resposta: `{ "itens": [...], "pagina": 1, "limite": 20, "temMais": true }`.
 
 **`GET /threats/:id`** 🔒 — uma ameaça com os indicadores associados (`indicadores`). `404` se não existir.
 
@@ -129,11 +129,11 @@ Resposta: `{ "itens": [...], "pagina": 0, "limite": 20, "temMais": true }`.
 | --------- | ------ | -------------------------------------- |
 | `tipo`    | —      | `domain`, `url`, `ip`, `sha256`, `cve` |
 | `limite`  | `20`   | De 1 a 100                             |
-| `pagina`  | `0`    | A partir de 0                          |
+| `pagina`  | `1`    | A partir de 1                          |
 
 **`GET /indicators/:id`** 🔒 — um indicador. `404` se não existir.
 
-> **Atenção:** a paginação de `/threats` e `/indicators` começa em **0**, e a de `/scans` começa em **1**. Isso é um problema de consistência a ser corrigido antes de a API ter clientes externos (ver "Pendências" abaixo).
+Todas as listas paginam a partir de **1**. Uma página 0 é recusada com `400`.
 
 ### Alertas por e-mail
 
@@ -160,5 +160,4 @@ Os e-mails trazem um cabeçalho `List-Unsubscribe-Post` (RFC 8058), para que o c
 
 ## Pendências desta documentação
 
-- Padronizar a paginação (`/scans` começa em 1; `/threats` e `/indicators` começam em 0).
 - Confirmar, com um teste, o corpo exato da resposta `429` do `@fastify/rate-limit`. Aqui ele só aparece pelo status.

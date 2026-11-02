@@ -100,7 +100,7 @@ export function criarLeitorAmeacasSupabase(config: ConfigSupabase): LeitorAmeaca
         consulta = consulta.eq('severity', filtros.severidade);
       }
 
-      const inicio = filtros.pagina * filtros.limite;
+      const inicio = (filtros.pagina - 1) * filtros.limite;
       const { data, error } = await consulta
         .order('published_at', { ascending: false, nullsFirst: false })
         .order('id', { ascending: true })
@@ -147,7 +147,7 @@ export function criarLeitorAmeacasSupabase(config: ConfigSupabase): LeitorAmeaca
         consulta = consulta.eq('indicator_type', filtros.tipo);
       }
 
-      const inicio = filtros.pagina * filtros.limite;
+      const inicio = (filtros.pagina - 1) * filtros.limite;
       const { data, error } = await consulta
         .order('last_seen_at', { ascending: false })
         .order('id', { ascending: true })

@@ -7,7 +7,7 @@ const PAGINA_MAXIMA = 10_000;
 
 const paginacaoSchema = {
   limite: z.coerce.number().int().min(1).max(LIMITE_MAXIMO).default(LIMITE_PADRAO),
-  pagina: z.coerce.number().int().min(0).max(PAGINA_MAXIMA).default(0),
+  pagina: z.coerce.number().int().min(1).max(PAGINA_MAXIMA).default(1),
 };
 
 export const consultaAmeacasSchema = z.object({
