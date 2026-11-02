@@ -1,0 +1,38 @@
+name: Coleta e alertas
+
+# Roda a coleta da CISA KEV e envia os alertas. Substitui um agendador pago.
+on:
+  schedule:
+    # 06:00 UTC, que são 03:00 em Brasília.
+    - cron: '0 6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: coleta
+  cancel-in-progress: false
+
+jobs:
+  ingestao:
+    name: Coleta e alertas
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+        working-directory: backend
+      - run: npm run ingestao
+        working-directory: backend
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          ALERTA_REMETENTE: ${{ secrets.ALERTA_REMETENTE }}
+          URL_PUBLICA_API: ${{ secrets.URL_PUBLICA_API }}
