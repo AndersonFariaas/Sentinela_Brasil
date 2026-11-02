@@ -66,6 +66,22 @@ describe('API', () => {
     expect(bloqueada.headers['access-control-allow-origin']).toBeUndefined();
   });
 
+  it('libera PUT e DELETE no preflight, que o front usa em alertas e exclusões', async () => {
+    const preflight = await app.inject({
+      method: 'OPTIONS',
+      url: '/api/v1/scans/00000000-0000-4000-8000-000000000000',
+      headers: {
+        origin: 'http://localhost:5173',
+        'access-control-request-method': 'DELETE',
+      },
+    });
+
+    const metodos = String(preflight.headers['access-control-allow-methods'])
+      .split(',')
+      .map((metodo) => metodo.trim());
+    expect(metodos).toEqual(expect.arrayContaining(['PUT', 'DELETE']));
+  });
+
   it('envia cabeçalhos de segurança do helmet', async () => {
     const resposta = await app.inject({ method: 'GET', url: '/api/v1/health' });
 
