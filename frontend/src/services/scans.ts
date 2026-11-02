@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { CLASSIFICACOES } from '@/constantes/scanner';
 import { SEVERIDADES } from '@/constantes/ameacas';
-import { ErroApi, enviarJsonAutenticado, obterJsonAutenticado } from './api';
+import { ErroApi, enviarJsonAutenticado, excluirAutenticado, obterJsonAutenticado } from './api';
 
 const evidenciaSchema = z.object({
   grupo: z.enum(['R', 'E']),
@@ -71,4 +71,40 @@ export async function criarAnalise(token: string, url: string): Promise<Scan> {
 export async function buscarAnalise(token: string, id: string): Promise<Scan> {
   const corpo = await obterJsonAutenticado(`/api/v1/scans/${encodeURIComponent(id)}`, token);
   return scanSchema.parse(corpo);
+}
+
+const resumoAnaliseSchema = z.object({
+  id: z.uuid(),
+  url: z.string(),
+  host: z.string(),
+  classificacao: z.enum(CLASSIFICACOES),
+  pontuacao: z.number().int().min(0).max(100),
+  nivel: z.enum(SEVERIDADES),
+  criadaEm: z.string(),
+});
+
+const historicoSchema = z.object({
+  itens: z.array(resumoAnaliseSchema),
+  pagina: z.number().int(),
+  limite: z.number().int(),
+  temMais: z.boolean(),
+});
+
+export type ResumoAnalise = z.infer<typeof resumoAnaliseSchema>;
+export type Historico = z.infer<typeof historicoSchema>;
+
+/** Uma página do histórico do usuário, do mais recente para o mais antigo. */
+export async function listarHistorico(
+  token: string,
+  pagina: number,
+  limite: number,
+): Promise<Historico> {
+  const parametros = new URLSearchParams({ pagina: String(pagina), limite: String(limite) });
+  const corpo = await obterJsonAutenticado(`/api/v1/scans?${parametros.toString()}`, token);
+  return historicoSchema.parse(corpo);
+}
+
+/** Exclui uma análise do histórico. Lança ErroApi (404 quando já não existe). */
+export async function excluirAnalise(token: string, id: string): Promise<void> {
+  await excluirAutenticado(`/api/v1/scans/${encodeURIComponent(id)}`, token);
 }

@@ -4,7 +4,7 @@
 
 Plataforma de Cyber Threat Intelligence que reúne fontes públicas de segurança, analisa URLs suspeitas, classifica o risco com regras documentadas e explica o resultado com IA.
 
-**Status:** Fase 7 (Alertas por e-mail). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas, explicação por IA com fallback e alertas por e-mail via Resend.
+**Status:** Fase 8 (Integração completa). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas, explicação por IA com fallback, alertas por e-mail via Resend, histórico com exclusão e configuração de alertas no painel.
 
 ## Requisitos
 
@@ -95,6 +95,13 @@ Quando uma ameaça verificada entra no banco, a coleta cria um alerta para cada 
 - Cada e-mail tem link de cancelamento e o cabeçalho `List-Unsubscribe`, para o botão de cancelar do cliente de e-mail. O cancelamento desativa só a inscrição da categoria. O link só mostra a confirmação em GET: quem cancela é o POST.
 - `URL_PUBLICA_API` é obrigatória para enviar. Sem ela, o e-mail sairia sem link de cancelamento, então os alertas ficam desativados.
 - **Limitação:** não existe tela de inscrições ainda (FE-011). Quem quiser se inscrever hoje precisa ser inscrito pelo banco.
+
+## Histórico e configuração de alertas (Fase 8)
+
+- **Histórico** (`GET /api/v1/scans?pagina=1&limite=20`): análises do usuário, da mais recente para a mais antiga, com paginação de até 50 itens por página.
+- **Exclusão** (`DELETE /api/v1/scans/:id`): apaga a análise e a explicação junto. A RLS só deixa o dono apagar o próprio registro, e a exclusão é exigência da LGPD.
+- **Inscrições** (`GET` e `PUT /api/v1/alertas/inscricoes/:categoria`): ligar ou desligar os alertas de cada categoria. A tela **Alertas** do painel faz isso. Sem registro, a categoria fica inativa.
+- Todas as rotas usam o token do próprio usuário. Os testes de integração confirmam que um usuário não consegue ver, apagar ou alterar os dados de outro.
 
 ## Licença
 

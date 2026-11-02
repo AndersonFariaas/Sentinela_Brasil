@@ -9,6 +9,9 @@ import { criarAutenticadorSupabase } from './integrations/supabase/autenticador.
 import { criarLeitorAmeacasSupabase } from './integrations/supabase/leitor-ameacas.js';
 import { criarRepositorioScansSupabase } from './integrations/supabase/repositorio-scans.js';
 import { criarCancelarInscricaoSupabase } from './integrations/supabase/cancelamento-supabase.js';
+import { criarRepositorioInscricoesSupabase } from './integrations/supabase/repositorio-inscricoes.js';
+import { inscricoesRoutes } from './modules/alerts/inscricoes.routes.js';
+import type { RepositorioInscricoes } from './modules/alerts/inscricoes.js';
 import {
   cancelamentoRoutes,
   type CancelarInscricao,
@@ -44,6 +47,8 @@ interface OpcoesApp {
   provedorIa?: ProvedorIa | null;
   /** Cancelamento de inscrição alternativo. Os testes usam uma versão em memória. */
   cancelarInscricao?: CancelarInscricao;
+  /** Repositório das inscrições em alertas alternativo. Os testes usam uma versão em memória. */
+  repositorioInscricoes?: RepositorioInscricoes;
 }
 
 export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<FastifyInstance> {
@@ -89,6 +94,11 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
   await app.register(cancelamentoRoutes, {
     prefix: PREFIXO_API,
     cancelar: opcoes.cancelarInscricao ?? criarCancelarInscricaoSupabase(env),
+  });
+  await app.register(inscricoesRoutes, {
+    prefix: PREFIXO_API,
+    autenticador,
+    repositorio: opcoes.repositorioInscricoes ?? criarRepositorioInscricoesSupabase(env),
   });
 
   return app;

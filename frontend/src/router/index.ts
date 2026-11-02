@@ -67,6 +67,12 @@ const rotas: RouteRecordRaw[] = [
         component: () => import('@/pages/HistoricoPage.vue'),
         meta: { titulo: 'Histórico' },
       },
+      {
+        path: 'alertas',
+        name: 'alertas',
+        component: () => import('@/pages/AlertasPage.vue'),
+        meta: { titulo: 'Alertas' },
+      },
     ],
   },
   { path: '/:pathMatch(.*)*', redirect: { name: 'painel' } },
