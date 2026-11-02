@@ -28,6 +28,7 @@
     "@fastify/rate-limit": "11.2.1",
     "@supabase/supabase-js": "^2.118.0",
     "fastify": "^5.12.7",
+    "resend": "6.34.1",
     "zod": "^4.6.7"
   },
   "devDependencies": {

@@ -4,7 +4,7 @@
 
 Plataforma de Cyber Threat Intelligence que reúne fontes públicas de segurança, analisa URLs suspeitas, classifica o risco com regras documentadas e explica o resultado com IA.
 
-**Status:** Fase 5 (Detector de phishing). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas e resultado verificável no front.
+**Status:** Fase 7 (Alertas por e-mail). Coleta ativa para a CISA KEV, detector de URL com regras determinísticas, explicação por IA com fallback e alertas por e-mail via Resend.
 
 ## Requisitos
 
@@ -73,6 +73,28 @@ A saída é uma linha JSON por evento, sem segredos. O comando sai com código 1
 - Endereços internos, privados e com usuário e senha são recusados antes de qualquer consulta.
 - Pesos e limites ficam em [backend/src/config/risk-rules.json](backend/src/config/risk-rules.json), com versão gravada em cada resultado.
 - A reputação usa só os indicadores já coletados. Sem a URLhaus ativa, a maioria dos resultados fica em `nao_identificado`, e a pontuação fica limitada a 39.
+
+## Análise por IA (Fase 6)
+
+A explicação do resultado é gerada pela Anthropic. A classificação e a pontuação vêm sempre do motor de regras.
+
+- Modelo padrão: `claude-haiku-5-5`. Para trocar, defina `IA_MODELO` no `.env` do servidor.
+- Só o host e as evidências são enviados ao modelo. A URL completa fica no servidor.
+- Resposta fora do contrato, ou que contradiz o motor, é descartada. Nesse caso, e sem `ANTHROPIC_API_KEY`, o texto vem das regras (`ai_status = fallback`).
+- Limite de 20 análises por minuto por sessão (token de login), em memória do processo.
+
+## Alertas por e-mail (Fase 7)
+
+Quando uma ameaça verificada entra no banco, a coleta cria um alerta para cada usuário inscrito na categoria e envia o e-mail pela Resend. Hoje, a única fonte que verifica ameaças é a CISA KEV.
+
+- O gatilho é o próprio `npm run ingestao`, logo após a coleta. Não há agendador: quem roda a coleta também dispara os alertas.
+- Sem `RESEND_API_KEY` no `.env`, a coleta roda normalmente e os alertas ficam desativados.
+- `ALERTA_REMETENTE` é opcional. O padrão, `onboarding@resend.dev`, só envia para o e-mail da conta Resend. Para enviar a outros destinatários, verifique um domínio na Resend e use um remetente desse domínio.
+- Não há duplicidade: cada alerta tem chave única no banco e a mesma chave de idempotência na Resend. A Resend guarda essa chave por 24 horas. Repetir a execução não reenvia.
+- Até três tentativas por alerta. Erro de chave, de remetente ou de dados não é repetido.
+- Cada e-mail tem link de cancelamento e o cabeçalho `List-Unsubscribe`, para o botão de cancelar do cliente de e-mail. O cancelamento desativa só a inscrição da categoria. O link só mostra a confirmação em GET: quem cancela é o POST.
+- `URL_PUBLICA_API` é obrigatória para enviar. Sem ela, o e-mail sairia sem link de cancelamento, então os alertas ficam desativados.
+- **Limitação:** não existe tela de inscrições ainda (FE-011). Quem quiser se inscrever hoje precisa ser inscrito pelo banco.
 
 ## Licença
 
