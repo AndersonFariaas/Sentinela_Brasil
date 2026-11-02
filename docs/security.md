@@ -213,7 +213,7 @@ Dois avisos, ambos intencionais:
 **Histórico do repositório**
 
 - A busca por padrões de chave (Resend, Anthropic, Supabase no formato antigo e no novo, GitHub, AWS) não achou nenhum valor. A palavra `service_role` aparece em código e em documentação, sem valor associado.
-- Isso não substitui a varredura completa com gitleaks antes de tornar o repositório público (SEN-014). Essa varredura continua pendente.
+- Varredura completa com gitleaks v8.30.1 em todos os branches remotos, incluindo o diff dos commits de merge, em 02/11/2026: sem vazamento encontrado. Ela não cobre objetos órfãos nem o reflog. Para repetir, rode o workflow _Varredura do histórico_ manualmente (SEN-014).
 
 **Falsos negativos do motor**
 

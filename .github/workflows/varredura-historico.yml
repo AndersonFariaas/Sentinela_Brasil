@@ -1,0 +1,31 @@
+# Varredura de segredos em todo o histórico do repositório (SEN-014).
+# Roda só manualmente. Não substitui a varredura do CI, que olha apenas os commits novos.
+name: Varredura do histórico
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  historico:
+    name: Varredura de todo o histórico
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # O checkout só traz o branch em execução. Buscar todos os branches e tags garante
+      # que a varredura cubra os commits que existem só em branches de feature.
+      - name: Buscar todos os branches e tags
+        run: git fetch --prune origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*'
+      # Versão fixada. Publicada em 21/03/2026, com mais de 14 dias.
+      # --redact mascara os valores encontrados, para que o log não exponha o segredo.
+      - name: Varrer todos os commits
+        run: >
+          docker run --rm --user "$(id -u):$(id -g)"
+          -v "$GITHUB_WORKSPACE:/repo"
+          ghcr.io/gitleaks/gitleaks:v8.30.1
+          git /repo --log-opts="--all -m" --redact --verbose --exit-code 1
