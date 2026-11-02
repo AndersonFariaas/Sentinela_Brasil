@@ -7,7 +7,9 @@ services:
     plan: free
     region: oregon
     rootDir: backend
-    buildCommand: npm ci && npm run build
+    # Com NODE_ENV=production, o npm ci pula as devDependencies (typescript, @types/node).
+    # O build precisa delas, então força a instalação; o runtime continua em produção.
+    buildCommand: npm ci --include=dev && npm run build
     startCommand: npm start
     healthCheckPath: /api/v1/health
     envVars:
