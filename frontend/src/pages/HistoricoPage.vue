@@ -130,7 +130,10 @@ onMounted(() => void carregar(true));
           <p class="text-sm text-texto-suave">Analisado em {{ formatarData(item.criadaEm) }}</p>
 
           <div class="flex flex-wrap items-center gap-3">
-            <RouterLink :to="{ name: 'resultado', params: { id: item.id } }" class="link">
+            <RouterLink
+              :to="{ name: 'resultado', params: { id: item.id } }"
+              class="link inline-flex min-h-11 items-center"
+            >
               Ver resultado
             </RouterLink>
 
