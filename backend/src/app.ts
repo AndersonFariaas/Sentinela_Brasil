@@ -1,5 +1,6 @@
 import type { Writable } from 'node:stream';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import helmet from '@fastify/helmet';
 import Fastify, { type FastifyInstance } from 'fastify';
 import { criarOpcoesLogger } from './config/logger.js';
@@ -45,6 +46,8 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
 
   await app.register(helmet);
   await app.register(cors, { origin: env.CORS_ORIGIN });
+  // Global desligado: cada rota declara o próprio limite.
+  await app.register(rateLimit, { global: false });
 
   app.setNotFoundHandler((_request, reply) => {
     reply.status(404).send({ error: { code: 'NOT_FOUND', message: 'Rota não encontrada.' } });

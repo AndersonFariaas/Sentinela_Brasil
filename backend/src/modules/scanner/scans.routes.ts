@@ -1,6 +1,7 @@
-import type { FastifyPluginCallback } from 'fastify';
+import { createHash } from 'node:crypto';
+import type { FastifyPluginCallback, FastifyRequest } from 'fastify';
 import { z } from 'zod';
-import { exigirUsuario, obterSessao } from '../auth/auth.guard.js';
+import { exigirUsuario, extrairTokenBearer, obterSessao } from '../auth/auth.guard.js';
 import type { Autenticador } from '../auth/auth.types.js';
 import { REGRAS_RISCO } from './regras.js';
 import type { AnaliseRegistrada, RepositorioScans } from './repositorio.js';
@@ -30,6 +31,19 @@ const ERRO_CORPO = {
 const RESPOSTA_NAO_ENCONTRADA = {
   error: { code: 'NAO_ENCONTRADO', message: 'Registro não encontrado.' },
 };
+
+// Cada análise grava no banco e pode chamar a IA, então o limite protege custo e disponibilidade.
+const LIMITE_ANALISES = { max: 20, timeWindow: '1 minute' } as const;
+
+/**
+ * Chave do limite: o hash do token, para que um usuário não seja confundido com outro
+ * atrás do mesmo IP. Sem token, usa o IP (a requisição será recusada logo depois).
+ * O token em si nunca é guardado.
+ */
+function chaveDeLimite(request: FastifyRequest): string {
+  const token = extrairTokenBearer(request.headers.authorization);
+  return token ? createHash('sha256').update(token).digest('hex') : request.ip;
+}
 
 function serializarAnalise(analise: {
   id: string;
@@ -66,8 +80,12 @@ export const scansRoutes: FastifyPluginCallback<OpcoesScansRoutes> = (
   done,
 ) => {
   const protegida = { preHandler: exigirUsuario(autenticador) };
+  const comLimite = {
+    ...protegida,
+    config: { rateLimit: { ...LIMITE_ANALISES, keyGenerator: chaveDeLimite } },
+  };
 
-  app.post('/scans', protegida, async (request, reply) => {
+  app.post('/scans', comLimite, async (request, reply) => {
     const corpo = corpoAnaliseSchema.safeParse(request.body);
     if (!corpo.success) {
       return reply.status(400).send(ERRO_CORPO);

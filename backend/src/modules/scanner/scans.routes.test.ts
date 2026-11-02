@@ -154,6 +154,23 @@ describe('rotas do scanner', () => {
       expect(resposta.statusCode).toBe(400);
       expect(resposta.json<{ error: { code: string } }>().error.code).toBe('DADOS_INVALIDOS');
     });
+
+    it('limita o número de análises por token e responde 429 quando passa do limite', async () => {
+      const servidor = await iniciar(repositorioFalso());
+      const codigos: number[] = [];
+      for (let tentativa = 0; tentativa < 21; tentativa += 1) {
+        const resposta = await servidor.inject({
+          method: 'POST',
+          url: '/api/v1/scans',
+          headers: AUTENTICADO,
+          payload: { url: 'https://exemplo.com/' },
+        });
+        codigos.push(resposta.statusCode);
+      }
+
+      expect(codigos.filter((codigo) => codigo === 201)).toHaveLength(20);
+      expect(codigos.at(-1)).toBe(429);
+    });
   });
 
   describe('GET /api/v1/scans/:id', () => {
