@@ -24,6 +24,7 @@ FAIXAS_IPV6.addSubnet('::', 128, 'ipv6');
 FAIXAS_IPV6.addSubnet('::1', 128, 'ipv6');
 FAIXAS_IPV6.addSubnet('fc00::', 7, 'ipv6');
 FAIXAS_IPV6.addSubnet('fe80::', 10, 'ipv6');
+FAIXAS_IPV6.addSubnet('ff00::', 8, 'ipv6');
 // Endereços IPv4 escritos em formato IPv6 (::ffff:a.b.c.d) são tratados como internos.
 FAIXAS_IPV6.addSubnet('::ffff:0:0', 96, 'ipv6');
 
@@ -57,9 +58,11 @@ export function ehEnderecoInterno(host: string): boolean {
     return FAIXAS_IPV6.check(host, 'ipv6');
   }
 
+  // "localhost." e "localhost" são o mesmo nome. Sem tirar o ponto final, o sufixo não casa.
+  const nome = host.replace(/\.+$/, '');
   // Nome sem ponto (ex.: "intranet") só resolve dentro de uma rede local.
-  const semPonto = !host.includes('.');
-  const sufixoInterno = SUFIXOS_INTERNOS.some((sufixo) => host.endsWith(sufixo));
+  const semPonto = !nome.includes('.');
+  const sufixoInterno = SUFIXOS_INTERNOS.some((sufixo) => nome.endsWith(sufixo));
   return semPonto || sufixoInterno;
 }
 

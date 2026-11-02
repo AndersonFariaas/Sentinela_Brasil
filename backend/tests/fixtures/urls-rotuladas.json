@@ -1,0 +1,566 @@
+{
+  "versao": "1.0.0",
+  "descricao": "Conjunto rotulado para medir o motor de risco (AI-006). Domínios são reservados (example.*) e IPs são de faixas de documentação (RFC 5737). A reputação é sintética: não representa dados de nenhuma fonte real. O rótulo 'perigosa' é o julgamento do analista, feito antes de rodar o motor.",
+  "casos": [
+    {
+      "id": "L01",
+      "categoria": "legitima",
+      "url": "https://www.example.com/",
+      "perigosa": false,
+      "justificativa": "Página inicial de domínio institucional, sem sinais estruturais nem reputação."
+    },
+    {
+      "id": "L02",
+      "categoria": "legitima",
+      "url": "https://docs.example.org/guia/introducao",
+      "perigosa": false,
+      "justificativa": "Documentação em caminho descritivo, sem termos de isca."
+    },
+    {
+      "id": "L03",
+      "categoria": "legitima",
+      "url": "https://www.example.net/noticias/2026/11/resumo",
+      "perigosa": false,
+      "justificativa": "Notícia com data no caminho. Nenhum sinal de risco."
+    },
+    {
+      "id": "L04",
+      "categoria": "legitima",
+      "url": "https://blog.example.com/posts/primeiros-passos",
+      "perigosa": false,
+      "justificativa": "Blog com subdomínio comum e caminho sem termos de isca."
+    },
+    {
+      "id": "L05",
+      "categoria": "legitima",
+      "url": "https://shop.example.com/produtos?categoria=livros",
+      "perigosa": false,
+      "justificativa": "Loja com parâmetro de busca simples."
+    },
+    {
+      "id": "L06",
+      "categoria": "legitima",
+      "url": "https://example.org/sobre",
+      "perigosa": false,
+      "justificativa": "Página institucional curta, sem sinais."
+    },
+    {
+      "id": "L07",
+      "categoria": "legitima",
+      "url": "https://api.example.net/v1/status",
+      "perigosa": false,
+      "justificativa": "Endpoint de status de API, sem sinais."
+    },
+    {
+      "id": "L08",
+      "categoria": "legitima",
+      "url": "https://www.example.com/contato#formulario",
+      "perigosa": false,
+      "justificativa": "Página de contato. O fragmento é removido na normalização."
+    },
+    {
+      "id": "L09",
+      "categoria": "legitima",
+      "url": "https://ajuda.example.org/perguntas-frequentes",
+      "perigosa": false,
+      "justificativa": "Central de ajuda, sem termos de isca."
+    },
+    {
+      "id": "L10",
+      "categoria": "legitima",
+      "url": "https://www.example.net/pt-br/",
+      "perigosa": false,
+      "justificativa": "Página com idioma no caminho."
+    },
+    {
+      "id": "L11",
+      "categoria": "legitima",
+      "url": "https://example.com/arquivos/relatorio.pdf",
+      "perigosa": false,
+      "justificativa": "Arquivo PDF em caminho descritivo."
+    },
+    {
+      "id": "L12",
+      "categoria": "legitima",
+      "url": "https://wiki.example.org/Historia_da_internet",
+      "perigosa": false,
+      "justificativa": "Página de enciclopédia, sem sinais."
+    },
+    {
+      "id": "S01",
+      "categoria": "suspeita_estrutural",
+      "url": "http://203.0.113.50/login",
+      "perigosa": true,
+      "justificativa": "IP direto, sem TLS e com termo de login. Padrão típico de página de golpe."
+    },
+    {
+      "id": "S02",
+      "categoria": "suspeita_estrutural",
+      "url": "https://login-conta.example.com/",
+      "perigosa": true,
+      "justificativa": "Termos de login e conta no nome do host. Imitação de tela bancária."
+    },
+    {
+      "id": "S03",
+      "categoria": "suspeita_estrutural",
+      "url": "https://verificar-senha.example.com/atualizar",
+      "perigosa": true,
+      "justificativa": "Pedido de verificação de senha. Padrão de isca."
+    },
+    {
+      "id": "S04",
+      "categoria": "suspeita_estrutural",
+      "url": "https://xn--pgamento-exemplo-9ub.example.com/",
+      "perigosa": true,
+      "justificativa": "Nome em punycode, possível imitação de marca com letras parecidas."
+    },
+    {
+      "id": "S05",
+      "categoria": "suspeita_estrutural",
+      "url": "https://a.b.c.d.e.example.com/",
+      "perigosa": false,
+      "justificativa": "Muitos subdomínios sem outro sinal. Sozinho, não indica golpe."
+    },
+    {
+      "id": "S06",
+      "categoria": "suspeita_estrutural",
+      "url": "https://pix-seguranca-confirmar.example.com/bloqueio/conta/senha",
+      "perigosa": true,
+      "justificativa": "Acúmulo de termos de isca (pix, segurança, bloqueio, senha) em um pedido de confirmação."
+    },
+    {
+      "id": "S07",
+      "categoria": "suspeita_estrutural",
+      "url": "https://site.example.xyz/",
+      "perigosa": false,
+      "justificativa": "Extensão de domínio de alto risco sem outro sinal. Sozinha, não basta para bloquear."
+    },
+    {
+      "id": "S08",
+      "categoria": "suspeita_estrutural",
+      "url": "https://login-verifica-conta-banco-pix.example.com/",
+      "perigosa": true,
+      "justificativa": "Muitos hífens e termos de isca no nome. Padrão de imitação de banco."
+    },
+    {
+      "id": "S09",
+      "categoria": "suspeita_estrutural",
+      "url": "http://198.51.100.7/",
+      "perigosa": true,
+      "justificativa": "IP direto sem TLS. Sites legítimos usam nome de domínio."
+    },
+    {
+      "id": "S10",
+      "categoria": "suspeita_estrutural",
+      "url": "https://www.example.org/guia/tutorial-muito-longo-sobre-como-organizar-arquivos-de-projetos-grandes-em-equipes-distribuidas-com-varios-repositorios-e-regras-de-revisao-separadas-por-area-de-negocio-e-por-tipo-de-entrega/capitulo-final",
+      "perigosa": false,
+      "justificativa": "Endereço longo de documentação. Comprimento sozinho não indica golpe."
+    },
+    {
+      "id": "S11",
+      "categoria": "suspeita_estrutural",
+      "url": "http://www.example.org/",
+      "perigosa": false,
+      "justificativa": "Site sem HTTPS, sem outro sinal. Risco baixo, não é golpe."
+    },
+    {
+      "id": "S12",
+      "categoria": "suspeita_estrutural",
+      "url": "https://www.example.net/confirmar-fatura-boleto",
+      "perigosa": true,
+      "justificativa": "Termos de fatura e boleto em pedido de confirmação. Padrão de cobrança falsa."
+    },
+    {
+      "id": "R01",
+      "categoria": "reputacao",
+      "url": "https://golpe-teste.example.net/login",
+      "perigosa": true,
+      "justificativa": "Domínio com correspondência de fonte confiável (5) e visto nos últimos 90 dias.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "golpe-teste.example.net",
+          "fonte": "Fonte sintética A",
+          "confiabilidade": 5,
+          "diasDesdeUltimaVez": 10
+        }
+      ]
+    },
+    {
+      "id": "R02",
+      "categoria": "reputacao",
+      "url": "https://secure.golpe-teste.example.net/",
+      "perigosa": true,
+      "justificativa": "Subdomínio de domínio com reputação recente. A regra de domínio pai deve pegar.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "golpe-teste.example.net",
+          "fonte": "Fonte sintética A",
+          "confiabilidade": 5,
+          "diasDesdeUltimaVez": 10
+        }
+      ]
+    },
+    {
+      "id": "R03",
+      "categoria": "reputacao",
+      "url": "http://203.0.113.10/",
+      "perigosa": true,
+      "justificativa": "IP com correspondência de fonte confiável visto recentemente.",
+      "reputacao": [
+        {
+          "tipo": "ip",
+          "valor": "203.0.113.10",
+          "fonte": "Fonte sintética A",
+          "confiabilidade": 5,
+          "diasDesdeUltimaVez": 5
+        }
+      ]
+    },
+    {
+      "id": "R04",
+      "categoria": "reputacao",
+      "url": "https://exemplo-malware.example.org/baixar.exe",
+      "perigosa": true,
+      "justificativa": "URL exata com confiabilidade 4 (mínima para confirmar), visto há 30 dias.",
+      "reputacao": [
+        {
+          "tipo": "url",
+          "valor": "https://exemplo-malware.example.org/baixar.exe",
+          "fonte": "Fonte sintética B",
+          "confiabilidade": 4,
+          "diasDesdeUltimaVez": 30
+        }
+      ]
+    },
+    {
+      "id": "R05",
+      "categoria": "reputacao",
+      "url": "https://fraude-teste.example.com/",
+      "perigosa": true,
+      "justificativa": "Domínio com fonte de confiabilidade média, visto recentemente. Deve ficar como suspeito.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "fraude-teste.example.com",
+          "fonte": "Fonte sintética B",
+          "confiabilidade": 3,
+          "diasDesdeUltimaVez": 20
+        }
+      ]
+    },
+    {
+      "id": "R06",
+      "categoria": "reputacao",
+      "url": "https://antigo-golpe.example.com/",
+      "perigosa": true,
+      "justificativa": "Domínio de fonte confiável, mas visto há mais de 90 dias. O peso cai, não some.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "antigo-golpe.example.com",
+          "fonte": "Fonte sintética A",
+          "confiabilidade": 5,
+          "diasDesdeUltimaVez": 200
+        }
+      ]
+    },
+    {
+      "id": "R07",
+      "categoria": "reputacao",
+      "url": "https://www.example.com/",
+      "perigosa": false,
+      "justificativa": "Domínio com indicador fraco e antigo. Um analista não bloquearia por isso. Caso de falso positivo esperado.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "example.com",
+          "fonte": "Fonte sintética C",
+          "confiabilidade": 2,
+          "diasDesdeUltimaVez": 200
+        }
+      ]
+    },
+    {
+      "id": "R08",
+      "categoria": "reputacao",
+      "url": "http://203.0.113.20/painel",
+      "perigosa": true,
+      "justificativa": "IP de fonte de confiabilidade média e antiga. Deve ficar como suspeito.",
+      "reputacao": [
+        {
+          "tipo": "ip",
+          "valor": "203.0.113.20",
+          "fonte": "Fonte sintética B",
+          "confiabilidade": 3,
+          "diasDesdeUltimaVez": 150
+        }
+      ]
+    },
+    {
+      "id": "R09",
+      "categoria": "reputacao",
+      "url": "https://pagamento-teste.example.com/fatura/",
+      "perigosa": true,
+      "justificativa": "URL exata com correspondência recente de fonte confiável.",
+      "reputacao": [
+        {
+          "tipo": "url",
+          "valor": "https://pagamento-teste.example.com/fatura/",
+          "fonte": "Fonte sintética A",
+          "confiabilidade": 5,
+          "diasDesdeUltimaVez": 1
+        }
+      ]
+    },
+    {
+      "id": "R10",
+      "categoria": "reputacao",
+      "url": "https://loja.pagamento-teste.example.com/",
+      "perigosa": true,
+      "justificativa": "Subdomínio de domínio com correspondência recente. Deve ser confirmado pelo domínio pai.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "pagamento-teste.example.com",
+          "fonte": "Fonte sintética A",
+          "confiabilidade": 5,
+          "diasDesdeUltimaVez": 1
+        }
+      ]
+    },
+    {
+      "id": "R11",
+      "categoria": "reputacao",
+      "url": "http://192.0.2.200/",
+      "perigosa": true,
+      "justificativa": "IP de fonte confiável com confiabilidade 4, visto recentemente.",
+      "reputacao": [
+        {
+          "tipo": "ip",
+          "valor": "192.0.2.200",
+          "fonte": "Fonte sintética C",
+          "confiabilidade": 4,
+          "diasDesdeUltimaVez": 45
+        }
+      ]
+    },
+    {
+      "id": "R12",
+      "categoria": "reputacao",
+      "url": "https://exemplo-antigo.example.net/",
+      "perigosa": false,
+      "justificativa": "Indicador fraco e antigo de domínio que hoje é institucional. Caso de falso positivo esperado.",
+      "reputacao": [
+        {
+          "tipo": "domain",
+          "valor": "exemplo-antigo.example.net",
+          "fonte": "Fonte sintética C",
+          "confiabilidade": 1,
+          "diasDesdeUltimaVez": 300
+        }
+      ]
+    },
+    {
+      "id": "D01",
+      "categoria": "redirecionamento",
+      "url": "https://www.example.com/redirecionar?destino=https://login-verifica.example.net/entrar",
+      "perigosa": true,
+      "justificativa": "Redirecionamento aberto que leva a termos de login. O destino real está no parâmetro."
+    },
+    {
+      "id": "D02",
+      "categoria": "redirecionamento",
+      "url": "https://example.org/go?u=http://203.0.113.9/",
+      "perigosa": true,
+      "justificativa": "Redirecionamento para IP direto escondido no parâmetro. O motor só olha host, caminho e busca."
+    },
+    {
+      "id": "D03",
+      "categoria": "redirecionamento",
+      "url": "https://example.com/out?url=https://www.example.com/",
+      "perigosa": false,
+      "justificativa": "Redirecionamento interno para domínio institucional."
+    },
+    {
+      "id": "D04",
+      "categoria": "redirecionamento",
+      "url": "https://news.example.net/link?to=https://www.example.org/artigo",
+      "perigosa": false,
+      "justificativa": "Link de notícia para outro domínio institucional."
+    },
+    {
+      "id": "D05",
+      "categoria": "redirecionamento",
+      "url": "https://www.example.com/r?next=https://conta-bloqueio.example.net/confirmar",
+      "perigosa": true,
+      "justificativa": "Redirecionamento para tela de bloqueio de conta. Padrão de isca."
+    },
+    {
+      "id": "D06",
+      "categoria": "redirecionamento",
+      "url": "https://example.org/?redirect=http://192.0.2.44/login",
+      "perigosa": true,
+      "justificativa": "Redirecionamento para IP com termo de login."
+    },
+    {
+      "id": "D07",
+      "categoria": "redirecionamento",
+      "url": "https://shop.example.com/checkout?return=https://www.example.com/pedido",
+      "perigosa": false,
+      "justificativa": "Retorno de checkout para página própria da loja."
+    },
+    {
+      "id": "D08",
+      "categoria": "redirecionamento",
+      "url": "https://www.example.net/?ref=https://ajuda.example.org/",
+      "perigosa": false,
+      "justificativa": "Parâmetro de referência para central de ajuda institucional."
+    },
+    {
+      "id": "I01",
+      "categoria": "invalida",
+      "url": "ftp://example.com/arquivo",
+      "perigosa": false,
+      "justificativa": "Protocolo FTP. Deve ser recusada na validação.",
+      "motivoEsperado": "protocolo"
+    },
+    {
+      "id": "I02",
+      "categoria": "invalida",
+      "url": "javascript:alert(1)",
+      "perigosa": false,
+      "justificativa": "Esquema javascript. Deve ser recusado.",
+      "motivoEsperado": "protocolo"
+    },
+    {
+      "id": "I03",
+      "categoria": "invalida",
+      "url": "file:///etc/passwd",
+      "perigosa": false,
+      "justificativa": "Esquema file. Deve ser recusado.",
+      "motivoEsperado": "protocolo"
+    },
+    {
+      "id": "I04",
+      "categoria": "invalida",
+      "url": "https://usuario:senha@example.com/",
+      "perigosa": false,
+      "justificativa": "URL com usuário e senha embutidos. Deve ser recusada.",
+      "motivoEsperado": "credenciais"
+    },
+    {
+      "id": "I05",
+      "categoria": "invalida",
+      "url": "isto não é um endereço",
+      "perigosa": false,
+      "justificativa": "Texto que não é URL.",
+      "motivoEsperado": "formato"
+    },
+    {
+      "id": "I06",
+      "categoria": "invalida",
+      "url": "   ",
+      "perigosa": false,
+      "justificativa": "Entrada vazia.",
+      "motivoEsperado": "formato"
+    },
+    {
+      "id": "I07",
+      "categoria": "invalida",
+      "url": "https://example.com/\u0007caminho",
+      "perigosa": false,
+      "justificativa": "Caractere de controle no meio da URL.",
+      "motivoEsperado": "formato"
+    },
+    {
+      "id": "I08",
+      "categoria": "invalida",
+      "url": "https://",
+      "perigosa": false,
+      "justificativa": "URL sem host.",
+      "motivoEsperado": "formato"
+    },
+    {
+      "id": "P01",
+      "categoria": "privada",
+      "url": "http://127.0.0.1/admin",
+      "perigosa": false,
+      "justificativa": "Loopback. Recusada antes de qualquer análise, sem conexão.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P02",
+      "categoria": "privada",
+      "url": "http://10.0.0.5/",
+      "perigosa": false,
+      "justificativa": "Rede privada 10/8.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P03",
+      "categoria": "privada",
+      "url": "http://192.168.1.1/",
+      "perigosa": false,
+      "justificativa": "Rede privada 192.168/16, típica de roteador.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P04",
+      "categoria": "privada",
+      "url": "http://169.254.169.254/latest/meta-data/",
+      "perigosa": false,
+      "justificativa": "Endereço de metadados de nuvem.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P05",
+      "categoria": "privada",
+      "url": "http://[::1]/",
+      "perigosa": false,
+      "justificativa": "Loopback IPv6.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P06",
+      "categoria": "privada",
+      "url": "http://localhost:8080/",
+      "perigosa": false,
+      "justificativa": "Nome localhost com porta.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P07",
+      "categoria": "privada",
+      "url": "http://intranet/",
+      "perigosa": false,
+      "justificativa": "Nome sem ponto, só resolve em rede local.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P08",
+      "categoria": "privada",
+      "url": "http://painel.internal/",
+      "perigosa": false,
+      "justificativa": "Sufixo .internal.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P09",
+      "categoria": "privada",
+      "url": "http://localhost./",
+      "perigosa": false,
+      "justificativa": "localhost com ponto final. Brecha corrigida nesta fase.",
+      "motivoEsperado": "interno"
+    },
+    {
+      "id": "P10",
+      "categoria": "privada",
+      "url": "http://0x7f000001/",
+      "perigosa": false,
+      "justificativa": "127.0.0.1 em hexadecimal. O parser normaliza para loopback.",
+      "motivoEsperado": "interno"
+    }
+  ]
+}

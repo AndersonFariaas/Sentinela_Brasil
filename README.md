@@ -103,6 +103,13 @@ Quando uma ameaça verificada entra no banco, a coleta cria um alerta para cada 
 - **Inscrições** (`GET` e `PUT /api/v1/alertas/inscricoes/:categoria`): ligar ou desligar os alertas de cada categoria. A tela **Alertas** do painel faz isso. Sem registro, a categoria fica inativa.
 - Todas as rotas usam o token do próprio usuário. Os testes de integração confirmam que um usuário não consegue ver, apagar ou alterar os dados de outro.
 
+## Segurança, métricas e retenção (Fase 9)
+
+- **SSRF:** endereços internos são recusados na validação, sem conexão. Os casos estão em `validacao.test.ts`.
+- **Prompt injection:** `injecao.test.ts` roda um corpus de textos hostis (`backend/tests/fixtures/corpus-injecao.json`). Nenhum deles muda classificação ou pontuação.
+- **Métricas:** `npm run metricas` (dentro de `backend/`) roda 62 URLs rotuladas e grava `docs/metricas/relatorio-motor.md`. Os números medem as regras do motor sobre reputação sintética. Não medem as integrações nem a qualidade das fontes reais.
+- **Retenção:** `npm run limpeza` mostra quantos registros passaram do prazo de `database.md` §6, sem apagar. `npm run limpeza -- --executar` apaga e registra a limpeza em `audit_log`. O agendamento diário fica para a Fase 10 (deploy).
+
 ## Licença
 
 Distribuído sob a [licença MIT](LICENSE).

@@ -11,7 +11,9 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "test:integration": "vitest run --config vitest.integration.config.ts",
-    "ingestao": "tsx --env-file-if-exists=../.env src/jobs/ingestao.ts"
+    "ingestao": "tsx --env-file-if-exists=../.env src/jobs/ingestao.ts",
+    "metricas": "tsx tests/metricas/executar-metricas.ts",
+    "limpeza": "tsx --env-file-if-exists=../.env src/jobs/limpeza.ts"
   },
   "keywords": [],
   "author": "",
