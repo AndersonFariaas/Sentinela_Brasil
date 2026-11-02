@@ -5,6 +5,7 @@ import type { AlertaPendente, RepositorioAlertas } from './repositorio.js';
 import type { AmeacaAlerta } from './template.js';
 
 const AGORA = new Date('2026-11-02T12:00:00.000Z');
+const URL_API = 'https://api.exemplo.com';
 const CHAVE_ALERTA =
   'alert:11111111-1111-4111-8111-111111111111:22222222-2222-4222-8222-222222222222:nova_ameaca';
 
@@ -25,6 +26,7 @@ function alertaPendente(sobrescrever: Partial<AlertaPendente> = {}): AlertaPende
     tentativas: 0,
     destinatario: 'pessoa@exemplo.com',
     ameaca: AMEACA,
+    inscricaoId: 'inscricao-1',
     ...sobrescrever,
   };
 }
@@ -40,6 +42,7 @@ function repositorioFalso(sobrescrever: Partial<Record<keyof RepositorioAlertas,
       sobrescrever.listarAlertasPendentes ?? vi.fn().mockResolvedValue([alertaPendente()]),
     registrarEnvio: sobrescrever.registrarEnvio ?? vi.fn().mockResolvedValue(undefined),
     registrarFalha: sobrescrever.registrarFalha ?? vi.fn().mockResolvedValue(undefined),
+    cancelarAlerta: sobrescrever.cancelarAlerta ?? vi.fn().mockResolvedValue(undefined),
   };
 }
 
@@ -51,10 +54,37 @@ const registrar = vi.fn();
 const esperar = vi.fn().mockResolvedValue(undefined);
 
 function opcoes(provedor: ProvedorEmail) {
-  return { provedor, agora: AGORA, registrar, esperar };
+  return { provedor, urlPublicaApi: URL_API, agora: AGORA, registrar, esperar };
 }
 
 describe('dispararAlertas', () => {
+  it('envia com o link de cancelamento da inscrição de origem', async () => {
+    const enviar = vi.fn().mockResolvedValue('msg-link');
+    const repo = repositorioFalso({
+      listarAlertasPendentes: vi.fn().mockResolvedValue([alertaPendente()]),
+    });
+
+    await dispararAlertas(repo, opcoes(provedorFalso(enviar)));
+
+    expect(enviar.mock.calls[0]?.[0]).toMatchObject({
+      cancelamentoUrl: `${URL_API}/api/v1/alertas/cancelar/inscricao-1`,
+    });
+  });
+
+  it('cancela, sem enviar, alerta de inscrição já cancelada', async () => {
+    const enviar = vi.fn();
+    const repo = repositorioFalso({
+      listarAlertasPendentes: vi.fn().mockResolvedValue([alertaPendente({ inscricaoId: null })]),
+    });
+
+    const resumo = await dispararAlertas(repo, opcoes(provedorFalso(enviar)));
+
+    expect(enviar).not.toHaveBeenCalled();
+    expect(repo.cancelarAlerta).toHaveBeenCalledWith('alerta-1');
+    expect(resumo.enviados).toBe(0);
+    expect(resumo.falhas).toBe(0);
+  });
+
   it('cria um alerta por inscrito e envia cada um com a chave de idempotência do alerta', async () => {
     const enviar = vi.fn().mockResolvedValue('msg-1');
     const repo = repositorioFalso({

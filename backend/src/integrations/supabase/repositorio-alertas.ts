@@ -129,6 +129,20 @@ export function criarRepositorioAlertas(cliente: ClienteSupabase): RepositorioAl
         .in('id', ameacaIds);
       garantirSemErro(erroAmeacas, 'Falha ao ler ameaças dos alertas');
 
+      // Só inscrições ainda ativas: o link de cancelamento aponta para a inscrição de origem.
+      const { data: inscricoes, error: erroInscricoes } = await cliente
+        .from('subscriptions')
+        .select('id, user_id, category')
+        .in('user_id', usuarioIds)
+        .eq('enabled', true);
+      garantirSemErro(erroInscricoes, 'Falha ao ler inscrições dos alertas');
+
+      const inscricaoPorChave = new Map(
+        (inscricoes ?? []).map((inscricao) => [
+          `${inscricao.user_id}|${inscricao.category}`,
+          inscricao.id,
+        ]),
+      );
       const emailPorUsuario = new Map((perfis ?? []).map((perfil) => [perfil.id, perfil.email]));
       const ameacaPorId = new Map(
         (ameacas ?? []).map((linha) => {
@@ -153,9 +167,19 @@ export function criarRepositorioAlertas(cliente: ClienteSupabase): RepositorioAl
             tentativas: alerta.attempts,
             destinatario,
             ameaca,
+            inscricaoId: inscricaoPorChave.get(`${alerta.user_id}|${ameaca.categoria}`) ?? null,
           },
         ];
       });
+    },
+
+    async cancelarAlerta(alertaId) {
+      const { error } = await cliente
+        .from('alerts')
+        .update({ delivery_status: 'cancelado' })
+        .eq('id', alertaId)
+        .eq('delivery_status', 'pendente');
+      garantirSemErro(error, 'Falha ao cancelar alerta');
     },
 
     async registrarEnvio(alertaId, messageId, tentativas) {

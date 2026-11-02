@@ -1,3 +1,4 @@
+import { montarUrlCancelamento } from './cancelamento.js';
 import { ErroEnvioEmail, type MensagemEmail, type ProvedorEmail } from './envio.js';
 import type { AlertaPendente, RepositorioAlertas } from './repositorio.js';
 import { montarEmailAlerta } from './template.js';
@@ -21,6 +22,8 @@ export interface ResumoAlertas {
 
 export interface OpcoesAlertas {
   provedor: ProvedorEmail;
+  /** Base pública da API, usada para montar o link de cancelamento. */
+  urlPublicaApi: string;
   agora: Date;
   registrar: (evento: string, dados: Record<string, unknown>) => void;
   esperar?: (ms: number) => Promise<void>;
@@ -65,7 +68,15 @@ export async function dispararAlertas(
   let falhas = 0;
 
   for (const alerta of pendentes) {
-    const mensagem = montarEmailAlerta(alerta.ameaca, alerta.destinatario);
+    // Inscrição cancelada depois da criação do alerta: o alerta não sai.
+    if (alerta.inscricaoId === null) {
+      await repositorio.cancelarAlerta(alerta.id);
+      opcoes.registrar('alertas.cancelado', { alerta: alerta.id });
+      continue;
+    }
+
+    const urlCancelamento = montarUrlCancelamento(opcoes.urlPublicaApi, alerta.inscricaoId);
+    const mensagem = montarEmailAlerta(alerta.ameaca, alerta.destinatario, urlCancelamento);
     const resultado = await enviarComTentativas(repositorio, opcoes, esperar, alerta, mensagem);
 
     if (resultado === 'enviado') {

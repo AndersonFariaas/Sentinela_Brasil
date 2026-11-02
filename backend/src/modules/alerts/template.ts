@@ -71,7 +71,8 @@ function blocoFonte(ameaca: AmeacaAlerta): string {
     </p>`;
 }
 
-function montarHtml(ameaca: AmeacaAlerta, assunto: string): string {
+function montarHtml(ameaca: AmeacaAlerta, assunto: string, cancelamentoUrl: string): string {
+  const cancelamento = escaparHtml(cancelamentoUrl);
   const titulo = escaparHtml(ameaca.titulo);
   const categoria = escaparHtml(ROTULOS_CATEGORIA[ameaca.categoria]);
   const severidade = escaparHtml(ROTULOS_SEVERIDADE[ameaca.severidade]);
@@ -97,7 +98,7 @@ function montarHtml(ameaca: AmeacaAlerta, assunto: string): string {
                 <p style="margin:0 0 16px;font-size:14px;line-height:1.5;color:#555555;">Categoria: ${categoria} · Severidade: ${severidade}${cve}</p>
                 <p style="margin:0 0 20px;font-size:16px;line-height:1.5;">${descricao}</p>
                 ${blocoFonte(ameaca)}
-                <p style="margin:0;font-size:12px;line-height:1.5;color:#666666;">Você recebeu este e-mail porque está inscrito em alertas de ${categoria} no SENTINELA.</p>
+                <p style="margin:0;font-size:12px;line-height:1.5;color:#666666;">Você recebeu este e-mail porque está inscrito em alertas de ${categoria} no SENTINELA. <a href="${cancelamento}" style="color:#666666;">Cancelar esses alertas</a>.</p>
               </td>
             </tr>
           </table>
@@ -108,7 +109,7 @@ function montarHtml(ameaca: AmeacaAlerta, assunto: string): string {
 </html>`;
 }
 
-function montarTexto(ameaca: AmeacaAlerta): string {
+function montarTexto(ameaca: AmeacaAlerta, cancelamentoUrl: string): string {
   const linhas = [
     'SENTINELA · Nova ameaça',
     '',
@@ -125,17 +126,23 @@ function montarTexto(ameaca: AmeacaAlerta): string {
   linhas.push(
     '',
     `Você recebeu este e-mail porque está inscrito em alertas de ${ROTULOS_CATEGORIA[ameaca.categoria]} no SENTINELA.`,
+    `Para cancelar esses alertas: ${cancelamentoUrl}`,
   );
   return linhas.join('\n');
 }
 
-export function montarEmailAlerta(ameaca: AmeacaAlerta, destinatario: string): MensagemEmail {
+export function montarEmailAlerta(
+  ameaca: AmeacaAlerta,
+  destinatario: string,
+  cancelamentoUrl: string,
+): MensagemEmail {
   const assunto = assuntoSeguro(ameaca.titulo);
 
   return {
     para: destinatario,
     assunto,
-    html: montarHtml(ameaca, assunto),
-    texto: montarTexto(ameaca),
+    html: montarHtml(ameaca, assunto, cancelamentoUrl),
+    texto: montarTexto(ameaca, cancelamentoUrl),
+    cancelamentoUrl,
   };
 }

@@ -92,7 +92,9 @@ Quando uma ameaça verificada entra no banco, a coleta cria um alerta para cada 
 - `ALERTA_REMETENTE` é opcional. O padrão, `onboarding@resend.dev`, só envia para o e-mail da conta Resend. Para enviar a outros destinatários, verifique um domínio na Resend e use um remetente desse domínio.
 - Não há duplicidade: cada alerta tem chave única no banco e a mesma chave de idempotência na Resend. A Resend guarda essa chave por 24 horas. Repetir a execução não reenvia.
 - Até três tentativas por alerta. Erro de chave, de remetente ou de dados não é repetido.
-- **Limitação:** ainda não há link de cancelamento nem tela de inscrições (FE-011). Antes de enviar a usuários reais, isso precisa existir.
+- Cada e-mail tem link de cancelamento e o cabeçalho `List-Unsubscribe`, para o botão de cancelar do cliente de e-mail. O cancelamento desativa só a inscrição da categoria. O link só mostra a confirmação em GET: quem cancela é o POST.
+- `URL_PUBLICA_API` é obrigatória para enviar. Sem ela, o e-mail sairia sem link de cancelamento, então os alertas ficam desativados.
+- **Limitação:** não existe tela de inscrições ainda (FE-011). Quem quiser se inscrever hoje precisa ser inscrito pelo banco.
 
 ## Licença
 

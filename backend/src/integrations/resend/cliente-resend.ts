@@ -54,6 +54,11 @@ export function criarProvedorEmailResend(config: ConfigResend): ProvedorEmail {
             subject: mensagem.assunto,
             html: mensagem.html,
             text: mensagem.texto,
+            // Cliente de e-mail mostra o botão de cancelar sem abrir o corpo da mensagem.
+            headers: {
+              'List-Unsubscribe': `<${mensagem.cancelamentoUrl}>`,
+              'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+            },
           },
           { idempotencyKey: chaveIdempotencia },
         );

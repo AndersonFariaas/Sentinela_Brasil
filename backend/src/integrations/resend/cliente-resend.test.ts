@@ -18,6 +18,7 @@ const MENSAGEM = {
   assunto: 'Nova ameaça: teste',
   html: '<p>oi</p>',
   texto: 'oi',
+  cancelamentoUrl: 'https://api.exemplo.com/api/v1/alertas/cancelar/x',
 };
 
 describe('criarProvedorEmailResend', () => {
@@ -40,6 +41,10 @@ describe('criarProvedorEmailResend', () => {
         subject: MENSAGEM.assunto,
         html: MENSAGEM.html,
         text: MENSAGEM.texto,
+        headers: {
+          'List-Unsubscribe': `<${MENSAGEM.cancelamentoUrl}>`,
+          'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+        },
       },
       { idempotencyKey: 'alert:1' },
     );

@@ -12,11 +12,20 @@ const registrar: Registrador = (evento, dados) => {
   console.log(JSON.stringify({ evento, ...dados, em: new Date().toISOString() }));
 };
 
-/** Sem chave da Resend, os alertas ficam desativados e a coleta segue normalmente. */
+/**
+ * Sem chave da Resend ou sem a URL pública da API, os alertas ficam desativados e a coleta segue.
+ * Sem a URL, o e-mail sairia sem link de cancelamento, então não sai.
+ */
 async function enviarAlertas(env: EnvServico, cliente: ClienteSupabase): Promise<void> {
   const chave = env.RESEND_API_KEY?.trim();
   if (!chave) {
     registrar('alertas.desativados', { motivo: 'RESEND_API_KEY ausente' });
+    return;
+  }
+
+  const urlPublicaApi = env.URL_PUBLICA_API?.trim();
+  if (!urlPublicaApi) {
+    registrar('alertas.desativados', { motivo: 'URL_PUBLICA_API ausente' });
     return;
   }
 
@@ -25,6 +34,7 @@ async function enviarAlertas(env: EnvServico, cliente: ClienteSupabase): Promise
       apiKey: chave,
       remetente: env.ALERTA_REMETENTE || undefined,
     }),
+    urlPublicaApi,
     agora: new Date(),
     registrar,
   });

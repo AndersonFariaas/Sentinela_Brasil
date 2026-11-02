@@ -11,9 +11,20 @@ const AMEACA: AmeacaAlerta = {
   urlFonte: 'https://www.cisa.gov/known-exploited-vulnerabilities-catalog',
 };
 
+const CANCELAMENTO =
+  'https://api.exemplo.com/api/v1/alertas/cancelar/33333333-3333-4333-8333-333333333333';
+
 describe('montarEmailAlerta', () => {
+  it('inclui o link de cancelamento no corpo e no texto', () => {
+    const email = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com', CANCELAMENTO);
+
+    expect(email.html).toContain(`href="${CANCELAMENTO}"`);
+    expect(email.texto).toContain(`Para cancelar esses alertas: ${CANCELAMENTO}`);
+    expect(email.cancelamentoUrl).toBe(CANCELAMENTO);
+  });
+
   it('monta o e-mail com destinatário, assunto, HTML e texto', () => {
-    const email = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com');
+    const email = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com', CANCELAMENTO);
 
     expect(email.para).toBe('pessoa@exemplo.com');
     expect(email.assunto).toBe('Nova ameaça: CVE-2026-0001: Falha em servidor');
@@ -28,7 +39,7 @@ describe('montarEmailAlerta', () => {
       descricao: '<img src=x onerror="roubar()">',
     };
 
-    const { html } = montarEmailAlerta(ameaca, 'pessoa@exemplo.com');
+    const { html } = montarEmailAlerta(ameaca, 'pessoa@exemplo.com', CANCELAMENTO);
 
     expect(html).not.toContain('<script>');
     expect(html).not.toContain('<img src=x');
@@ -39,7 +50,7 @@ describe('montarEmailAlerta', () => {
   it('remove quebras de linha do assunto, para não injetar cabeçalhos', () => {
     const ameaca: AmeacaAlerta = { ...AMEACA, titulo: 'Linha um\r\nBcc: alguem@exemplo.com' };
 
-    const { assunto } = montarEmailAlerta(ameaca, 'pessoa@exemplo.com');
+    const { assunto } = montarEmailAlerta(ameaca, 'pessoa@exemplo.com', CANCELAMENTO);
 
     expect(assunto).not.toMatch(/[\r\n]/);
   });
@@ -47,21 +58,25 @@ describe('montarEmailAlerta', () => {
   it('limita o tamanho do assunto', () => {
     const ameaca: AmeacaAlerta = { ...AMEACA, titulo: 'x'.repeat(500) };
 
-    const { assunto } = montarEmailAlerta(ameaca, 'pessoa@exemplo.com');
+    const { assunto } = montarEmailAlerta(ameaca, 'pessoa@exemplo.com', CANCELAMENTO);
 
     expect(assunto.length).toBeLessThanOrEqual(120);
   });
 
   it('inclui o link da fonte com rel seguro e omite o bloco quando não há URL', () => {
-    const comLink = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com').html;
-    const semLink = montarEmailAlerta({ ...AMEACA, urlFonte: null }, 'pessoa@exemplo.com').html;
+    const comLink = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com', CANCELAMENTO).html;
+    const semLink = montarEmailAlerta(
+      { ...AMEACA, urlFonte: null },
+      'pessoa@exemplo.com',
+      CANCELAMENTO,
+    ).html;
 
     expect(comLink).toContain('rel="noopener noreferrer"');
     expect(semLink).not.toContain('Ver fonte oficial');
   });
 
   it('o texto puro não carrega tags HTML', () => {
-    const { texto } = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com');
+    const { texto } = montarEmailAlerta(AMEACA, 'pessoa@exemplo.com', CANCELAMENTO);
 
     expect(texto).not.toMatch(/<[a-z]/i);
   });

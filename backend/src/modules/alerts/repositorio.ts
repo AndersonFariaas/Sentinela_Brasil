@@ -7,6 +7,8 @@ export interface AlertaPendente {
   tentativas: number;
   destinatario: string;
   ameaca: AmeacaAlerta;
+  /** Inscrição que originou o alerta. Null quando ela já foi cancelada depois da criação. */
+  inscricaoId: string | null;
 }
 
 /** Contrato de persistência dos alertas. A implementação com Supabase fica em integrations/supabase. */
@@ -21,4 +23,6 @@ export interface RepositorioAlertas {
   listarAlertasPendentes(limite: number, tentativasMaximas: number): Promise<AlertaPendente[]>;
   registrarEnvio(alertaId: string, messageId: string, tentativas: number): Promise<void>;
   registrarFalha(alertaId: string, tentativas: number, mensagem: string): Promise<void>;
+  /** Alerta de inscrição já cancelada: não é enviado. */
+  cancelarAlerta(alertaId: string): Promise<void>;
 }

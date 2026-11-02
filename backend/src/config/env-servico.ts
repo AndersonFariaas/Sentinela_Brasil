@@ -8,6 +8,8 @@ const envServicoSchema = z.object({
   // O job trata chave vazia como ausente, porque o .env costuma trazer a linha sem valor.
   RESEND_API_KEY: z.string().optional(),
   ALERTA_REMETENTE: z.string().optional(),
+  // Base pública da API, usada no link de cancelamento. Sem ela, o alerta não é enviado.
+  URL_PUBLICA_API: z.string().optional(),
 });
 
 export type EnvServico = z.output<typeof envServicoSchema>;

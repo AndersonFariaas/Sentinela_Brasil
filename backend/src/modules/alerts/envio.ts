@@ -3,6 +3,8 @@ export interface MensagemEmail {
   assunto: string;
   html: string;
   texto: string;
+  /** Link de um clique para cancelar a inscrição. Vai no corpo e no cabeçalho List-Unsubscribe. */
+  cancelamentoUrl: string;
 }
 
 /**

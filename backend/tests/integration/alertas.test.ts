@@ -3,6 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { loadEnv } from '../../src/config/env.js';
 import type { Database } from '../../src/integrations/supabase/database.types.js';
+import { criarCancelarInscricaoSupabase } from '../../src/integrations/supabase/cancelamento-supabase.js';
 import { criarRepositorioAlertas } from '../../src/integrations/supabase/repositorio-alertas.js';
 import type { AlertaPendente } from '../../src/modules/alerts/repositorio.js';
 
@@ -155,5 +156,37 @@ describe('repositório de alertas (Supabase de desenvolvimento)', () => {
 
     const depois = alertasDaAmeaca(await repositorio.listarAlertasPendentes(100, 3));
     expect(depois).toHaveLength(0);
+  });
+
+  it('cancelar_inscricao desativa só a inscrição indicada, pela chave pública', async () => {
+    const { data: inscricaoB, error } = await admin
+      .from('subscriptions')
+      .select('id')
+      .eq('user_id', usuarioB)
+      .eq('category', CATEGORIA)
+      .single();
+    if (error) {
+      throw new Error(`Inscrição de teste não encontrada: ${error.message}`);
+    }
+
+    await criarCancelarInscricaoSupabase(env)(inscricaoB.id);
+
+    const { data: depoisB, error: erroB } = await admin
+      .from('subscriptions')
+      .select('enabled')
+      .eq('id', inscricaoB.id)
+      .single();
+    const { data: depoisA, error: erroA } = await admin
+      .from('subscriptions')
+      .select('enabled')
+      .eq('user_id', usuarioA)
+      .eq('category', CATEGORIA)
+      .single();
+    if (erroB || erroA) {
+      throw new Error('Falha ao reler inscrições após o cancelamento.');
+    }
+
+    expect(depoisB.enabled).toBe(false);
+    expect(depoisA.enabled).toBe(true);
   });
 });
