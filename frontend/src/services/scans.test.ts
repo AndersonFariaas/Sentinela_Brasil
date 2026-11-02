@@ -24,6 +24,8 @@ const SCAN = {
   fontes: [{ nome: 'Indicadores coletados', status: 'consultada', correspondencias: 0 }],
   analise: {
     status: 'fallback',
+    modelo: null,
+    evidenciasCitadas: [],
     resumo: 'Resumo de teste.',
     justificativa: 'Justificativa de teste.',
     recomendacoes: ['Recomendação de teste.'],

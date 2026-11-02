@@ -174,9 +174,11 @@ onMounted(() => void carregar());
       </section>
 
       <p class="text-sm text-texto-suave">
-        <template v-if="resultado.analise.status === 'fallback'">
-          Texto gerado a partir das regras, sem uso de IA nesta versão.
+        <template v-if="resultado.analise.status === 'ok'">
+          Explicação gerada por IA ({{ resultado.analise.modelo }}) a partir das evidências. A
+          classificação e a pontuação vêm das regras, não da IA.
         </template>
+        <template v-else> Texto gerado a partir das regras, sem uso de IA nesta análise. </template>
         Regras versão {{ resultado.algoritmo }}.
       </p>
     </template>

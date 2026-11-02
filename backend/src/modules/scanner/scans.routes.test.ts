@@ -4,6 +4,23 @@ import { buildApp } from '../../app.js';
 import type { Env } from '../../config/env.js';
 import { TOKEN_VALIDO, criarAutenticadorFalso } from '../../../tests/helpers/autenticador-falso.js';
 import type { AnaliseRegistrada, RepositorioScans } from './repositorio.js';
+import { ErroProvedorIa, type ProvedorIa } from '../ai-analyst/provedor.js';
+
+function provedorFalso(resposta: string | ErroProvedorIa): ProvedorIa {
+  return {
+    nome: 'anthropic',
+    modelo: 'claude-opus-5-5',
+    gerarTexto: () =>
+      typeof resposta === 'string' ? Promise.resolve(resposta) : Promise.reject(resposta),
+  };
+}
+
+const RESPOSTA_IA_VALIDA = JSON.stringify({
+  resumo: 'Não encontramos sinais de risco nas fontes disponíveis.',
+  justificativa: 'Pontuação 10 de 100 (nível baixo). Nenhum sinal foi encontrado.',
+  recomendacoes: ['Não informe senhas neste endereço.'],
+  evidenciasCitadas: [],
+});
 
 const ENV_TESTE: Env = {
   NODE_ENV: 'test',
@@ -39,7 +56,13 @@ function analiseGravada(): AnaliseRegistrada {
     evidencias: [],
     fontes: [{ nome: 'Indicadores coletados', status: 'consultada', correspondencias: 0 }],
     versaoAlgoritmo: '1.0.0',
-    statusIa: 'fallback',
+    analiseIa: {
+      status: 'fallback',
+      provedor: 'deterministico',
+      modelo: null,
+      versaoPrompt: 'fallback-1',
+      evidenciasCitadas: [],
+    },
     explicacao: {
       resumo: 'Resumo de teste.',
       justificativa: 'Justificativa de teste.',
@@ -56,10 +79,14 @@ describe('rotas do scanner', () => {
     app = undefined;
   });
 
-  async function iniciar(repositorio: RepositorioScans): Promise<FastifyInstance> {
+  async function iniciar(
+    repositorio: RepositorioScans,
+    provedorIa: ProvedorIa | null = null,
+  ): Promise<FastifyInstance> {
     app = await buildApp(ENV_TESTE, {
       autenticador: criarAutenticadorFalso(),
       repositorioScans: repositorio,
+      provedorIa,
     });
     return app;
   }
@@ -78,7 +105,9 @@ describe('rotas do scanner', () => {
     });
 
     it('analisa a URL, registra o resultado e responde 201 com a análise', async () => {
-      const registrarAnalise = vi.fn().mockResolvedValue(ID_ANALISE);
+      const registrarAnalise = vi
+        .fn<RepositorioScans['registrarAnalise']>()
+        .mockResolvedValue(ID_ANALISE);
       const servidor = await iniciar(repositorioFalso({ registrarAnalise }));
 
       const resposta = await servidor.inject({
@@ -105,7 +134,9 @@ describe('rotas do scanner', () => {
 
     it('não grava nem consulta nada quando a URL é recusada', async () => {
       const buscarCorrespondencias = vi.fn().mockResolvedValue([]);
-      const registrarAnalise = vi.fn().mockResolvedValue(ID_ANALISE);
+      const registrarAnalise = vi
+        .fn<RepositorioScans['registrarAnalise']>()
+        .mockResolvedValue(ID_ANALISE);
       const servidor = await iniciar(
         repositorioFalso({ buscarCorrespondencias, registrarAnalise }),
       );
@@ -214,6 +245,73 @@ describe('rotas do scanner', () => {
       });
 
       expect(resposta.statusCode).toBe(400);
+    });
+  });
+  describe('POST /api/v1/scans com IA', () => {
+    it('grava e devolve a explicação da IA quando ela passa na validação', async () => {
+      const registrarAnalise = vi
+        .fn<RepositorioScans['registrarAnalise']>()
+        .mockResolvedValue(ID_ANALISE);
+      const servidor = await iniciar(
+        repositorioFalso({ registrarAnalise }),
+        provedorFalso(RESPOSTA_IA_VALIDA),
+      );
+
+      const resposta = await servidor.inject({
+        method: 'POST',
+        url: '/api/v1/scans',
+        headers: AUTENTICADO,
+        payload: { url: 'https://exemplo.com/' },
+      });
+
+      expect(resposta.statusCode).toBe(201);
+      expect(
+        resposta.json<{ analise: { status: string; modelo: string } }>().analise,
+      ).toMatchObject({
+        status: 'ok',
+        modelo: 'claude-opus-5-5',
+      });
+      const [, enviada] = vi.mocked(registrarAnalise).mock.calls[0] ?? [];
+      expect(enviada?.analiseIa).toMatchObject({ status: 'ok', provedor: 'anthropic' });
+    });
+
+    it('responde 201 com texto determinístico quando o provedor falha', async () => {
+      const registrarAnalise = vi
+        .fn<RepositorioScans['registrarAnalise']>()
+        .mockResolvedValue(ID_ANALISE);
+      const servidor = await iniciar(
+        repositorioFalso({ registrarAnalise }),
+        provedorFalso(new ErroProvedorIa('tempo_esgotado')),
+      );
+
+      const resposta = await servidor.inject({
+        method: 'POST',
+        url: '/api/v1/scans',
+        headers: AUTENTICADO,
+        payload: { url: 'https://exemplo.com/' },
+      });
+
+      expect(resposta.statusCode).toBe(201);
+      expect(resposta.json<{ analise: { status: string } }>().analise.status).toBe('fallback');
+      const [, enviada] = vi.mocked(registrarAnalise).mock.calls[0] ?? [];
+      expect(enviada?.analiseIa).toMatchObject({ status: 'fallback', provedor: 'deterministico' });
+    });
+
+    it('não expõe a mensagem de erro do provedor ao usuário', async () => {
+      const servidor = await iniciar(
+        repositorioFalso(),
+        provedorFalso(new ErroProvedorIa('erro_provedor')),
+      );
+
+      const resposta = await servidor.inject({
+        method: 'POST',
+        url: '/api/v1/scans',
+        headers: AUTENTICADO,
+        payload: { url: 'https://exemplo.com/' },
+      });
+
+      expect(resposta.body).not.toContain('erro_provedor');
+      expect(resposta.body).not.toContain('Falha do provedor');
     });
   });
 });

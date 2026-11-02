@@ -18,7 +18,9 @@ const fonteSchema = z.object({
 });
 
 const analiseSchema = z.object({
-  status: z.string(),
+  status: z.enum(['ok', 'fallback']),
+  modelo: z.string().nullable(),
+  evidenciasCitadas: z.array(z.string()),
   resumo: z.string(),
   justificativa: z.string(),
   recomendacoes: z.array(z.string()),
