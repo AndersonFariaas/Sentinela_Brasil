@@ -28,7 +28,7 @@ const RESPOSTA_VALIDA = JSON.stringify({
 });
 
 function provedorFalso(gerarTexto: (requisicao: RequisicaoIa) => Promise<string>): ProvedorIa {
-  return { nome: 'anthropic', modelo: 'claude-opus-5-5', gerarTexto };
+  return { nome: 'anthropic', modelo: 'claude-haiku-5-5', gerarTexto };
 }
 
 describe('analisarComIa', () => {
@@ -46,7 +46,7 @@ describe('analisarComIa', () => {
     expect(resultado).toMatchObject({
       status: 'ok',
       provedor: 'anthropic',
-      modelo: 'claude-opus-5-5',
+      modelo: 'claude-haiku-5-5',
       versaoPrompt: VERSAO_PROMPT,
       explicacao: { evidenciasCitadas: ['palavra_isca'] },
     });

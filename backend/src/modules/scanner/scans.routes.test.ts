@@ -9,7 +9,7 @@ import { ErroProvedorIa, type ProvedorIa } from '../ai-analyst/provedor.js';
 function provedorFalso(resposta: string | ErroProvedorIa): ProvedorIa {
   return {
     nome: 'anthropic',
-    modelo: 'claude-opus-5-5',
+    modelo: 'claude-haiku-5-5',
     gerarTexto: () =>
       typeof resposta === 'string' ? Promise.resolve(resposta) : Promise.reject(resposta),
   };
@@ -269,7 +269,7 @@ describe('rotas do scanner', () => {
         resposta.json<{ analise: { status: string; modelo: string } }>().analise,
       ).toMatchObject({
         status: 'ok',
-        modelo: 'claude-opus-5-5',
+        modelo: 'claude-haiku-5-5',
       });
       const [, enviada] = vi.mocked(registrarAnalise).mock.calls[0] ?? [];
       expect(enviada?.analiseIa).toMatchObject({ status: 'ok', provedor: 'anthropic' });
