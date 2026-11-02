@@ -15,6 +15,7 @@ const itensNavegacao = [
   { rota: 'ameacas', rotulo: 'Threat Intelligence' },
   { rota: 'detector', rotulo: 'Detector' },
   { rota: 'historico', rotulo: 'Histórico' },
+  { rota: 'alertas', rotulo: 'Alertas' },
 ] as const;
 
 async function sair(): Promise<void> {

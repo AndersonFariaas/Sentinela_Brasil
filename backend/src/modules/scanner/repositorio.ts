@@ -51,6 +51,23 @@ export interface AnaliseRegistrada {
   explicacao: Explicacao;
 }
 
+/** Linha do histórico. Traz só o resumo: a análise completa vem de GET /scans/:id. */
+export interface ResumoAnalise {
+  id: string;
+  url: string;
+  host: string;
+  classificacao: Classificacao;
+  pontuacao: number;
+  nivel: NivelRisco;
+  criadaEm: string;
+}
+
+export interface PaginaAnalises {
+  itens: ResumoAnalise[];
+  /** Há itens depois desta página. Calculado buscando um item a mais, sem contar o total. */
+  temMais: boolean;
+}
+
 /**
  * Porta de acesso aos dados do scanner. Todas as chamadas recebem o token do usuário,
  * então a RLS do banco continua valendo. Os testes usam uma versão em memória.
@@ -62,4 +79,10 @@ export interface RepositorioScans {
   ): Promise<CorrespondenciaReputacao[]>;
   registrarAnalise(accessToken: string, analise: NovaAnalise): Promise<string>;
   buscarAnalise(accessToken: string, id: string): Promise<AnaliseRegistrada | null>;
+  listarAnalises(
+    accessToken: string,
+    pagina: { deslocamento: number; limite: number },
+  ): Promise<PaginaAnalises>;
+  /** Devolve false quando o registro não existe ou não é do usuário (a RLS filtra). */
+  excluirAnalise(accessToken: string, id: string): Promise<boolean>;
 }

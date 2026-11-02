@@ -37,6 +37,16 @@ const explicacaoSchema = z.object({
   evidenciasCitadas: z.array(z.string()).default([]),
 });
 
+const linhaResumoSchema = z.object({
+  id: z.uuid(),
+  url: z.string(),
+  host: z.string(),
+  classification: z.enum(CLASSIFICACOES),
+  risk_score: z.number().int().min(0).max(100),
+  risk_level: z.enum(NIVEIS_RISCO),
+  created_at: z.string(),
+});
+
 const linhaIndicadorSchema = z.object({
   indicator_type: z.enum(['url', 'domain', 'ip']),
   indicator_value: z.string(),
@@ -190,6 +200,40 @@ export function criarRepositorioScansSupabase(config: ConfigSupabase): Repositor
       };
 
       return resultado;
+    },
+
+    async listarAnalises(accessToken, pagina) {
+      const cliente = criarClienteDoUsuario(config, accessToken);
+      // range inclui as duas pontas: pedir limite + 1 linhas revela se existe próxima página.
+      const { data, error } = await cliente
+        .from('scans')
+        .select('id, url, host, classification, risk_score, risk_level, created_at')
+        .order('created_at', { ascending: false })
+        .order('id', { ascending: false })
+        .range(pagina.deslocamento, pagina.deslocamento + pagina.limite);
+      garantirSemErro(error, 'Falha ao listar o histórico');
+
+      const linhas = (data ?? []).map((linha) => linhaResumoSchema.parse(linha));
+      const itens = linhas.slice(0, pagina.limite).map((linha) => ({
+        id: linha.id,
+        url: linha.url,
+        host: linha.host,
+        classificacao: linha.classification,
+        pontuacao: linha.risk_score,
+        nivel: linha.risk_level,
+        criadaEm: linha.created_at,
+      }));
+
+      return { itens, temMais: linhas.length > pagina.limite };
+    },
+
+    async excluirAnalise(accessToken, id) {
+      const cliente = criarClienteDoUsuario(config, accessToken);
+      // A RLS só deixa apagar o próprio registro. As análises somem junto (on delete cascade).
+      const { data, error } = await cliente.from('scans').delete().eq('id', id).select('id');
+      garantirSemErro(error, 'Falha ao excluir o escaneamento');
+
+      return (data ?? []).length > 0;
     },
   };
 }

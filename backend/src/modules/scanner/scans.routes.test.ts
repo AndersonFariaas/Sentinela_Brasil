@@ -40,6 +40,8 @@ function repositorioFalso(sobrescrever: Partial<RepositorioScans> = {}): Reposit
     buscarCorrespondencias: vi.fn().mockResolvedValue([]),
     registrarAnalise: vi.fn().mockResolvedValue(ID_ANALISE),
     buscarAnalise: vi.fn().mockResolvedValue(null),
+    listarAnalises: vi.fn().mockResolvedValue({ itens: [], temMais: false }),
+    excluirAnalise: vi.fn().mockResolvedValue(false),
     ...sobrescrever,
   };
 }

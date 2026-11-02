@@ -1,6 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { ErroApi } from './api';
-import { buscarAnalise, criarAnalise, ErroUrlRecusada } from './scans';
+import {
+  buscarAnalise,
+  criarAnalise,
+  ErroUrlRecusada,
+  excluirAnalise,
+  listarHistorico,
+} from './scans';
 
 const ID = '66666666-6666-4666-8666-666666666666';
 
@@ -119,6 +125,78 @@ describe('buscarAnalise', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respostaJson({}, 404)));
 
     const falha = await buscarAnalise('t', ID).catch((erro: unknown) => erro);
+
+    expect(falha).toBeInstanceOf(ErroApi);
+    expect((falha as ErroApi).status).toBe(404);
+  });
+});
+
+const RESUMO = {
+  id: ID,
+  url: 'https://exemplo.com/login',
+  host: 'exemplo.com',
+  classificacao: 'suspeito',
+  pontuacao: 40,
+  nivel: 'alto',
+  criadaEm: '2026-11-01T12:00:00.000Z',
+};
+
+describe('listarHistorico', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('pede a página e o limite na URL e devolve o histórico validado', async () => {
+    const fetchFalso = vi
+      .fn()
+      .mockResolvedValue(respostaJson({ itens: [RESUMO], pagina: 2, limite: 20, temMais: true }));
+    vi.stubGlobal('fetch', fetchFalso);
+
+    const historico = await listarHistorico('token', 2, 20);
+
+    const [url] = fetchFalso.mock.calls[0] as [string];
+    expect(url).toContain('/api/v1/scans?pagina=2&limite=20');
+    expect(historico.itens).toHaveLength(1);
+    expect(historico.temMais).toBe(true);
+  });
+
+  it('rejeita item do histórico fora do contrato', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        respostaJson({
+          itens: [{ ...RESUMO, classificacao: 'seguro' }],
+          pagina: 1,
+          limite: 20,
+          temMais: false,
+        }),
+      ),
+    );
+
+    await expect(listarHistorico('token', 1, 20)).rejects.toThrow();
+  });
+});
+
+describe('excluirAnalise', () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('envia DELETE e aceita a resposta 204 sem corpo', async () => {
+    const fetchFalso = vi.fn().mockResolvedValue(new Response(null, { status: 204 }));
+    vi.stubGlobal('fetch', fetchFalso);
+
+    await excluirAnalise('token', ID);
+
+    const [url, init] = fetchFalso.mock.calls[0] as [string, RequestInit];
+    expect(url).toContain(`/api/v1/scans/${ID}`);
+    expect(init.method).toBe('DELETE');
+  });
+
+  it('propaga ErroApi 404 quando o registro já não existe', async () => {
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(respostaJson({}, 404)));
+
+    const falha = await excluirAnalise('token', ID).catch((erro: unknown) => erro);
 
     expect(falha).toBeInstanceOf(ErroApi);
     expect((falha as ErroApi).status).toBe(404);

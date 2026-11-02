@@ -29,6 +29,12 @@ const REGISTRO_SEM_IA: RegistroAnaliseIa = {
 const corpoAnaliseSchema = z.object({ url: z.string() });
 const parametroIdSchema = z.object({ id: z.uuid() });
 
+// Limite máximo evita carregar o histórico inteiro de uma vez.
+const consultaHistoricoSchema = z.object({
+  pagina: z.coerce.number().int().min(1).default(1),
+  limite: z.coerce.number().int().min(1).max(50).default(20),
+});
+
 const MENSAGENS_REJEICAO: Record<MotivoRejeicao, string> = {
   formato: 'Informe um endereço http ou https válido, com até 2048 caracteres.',
   protocolo: 'Só endereços http e https podem ser analisados.',
@@ -188,6 +194,46 @@ export const scansRoutes: FastifyPluginCallback<OpcoesScansRoutes> = (
         resultado,
       }),
     );
+  });
+
+  app.get('/scans', protegida, async (request, reply) => {
+    const consulta = consultaHistoricoSchema.safeParse(request.query);
+    if (!consulta.success) {
+      return reply.status(400).send({
+        error: { code: 'DADOS_INVALIDOS', message: 'Página ou limite inválidos.' },
+      });
+    }
+
+    const { pagina, limite } = consulta.data;
+    const { accessToken } = obterSessao(request);
+    const resultado = await repositorio.listarAnalises(accessToken, {
+      deslocamento: (pagina - 1) * limite,
+      limite,
+    });
+
+    return {
+      itens: resultado.itens,
+      pagina,
+      limite,
+      temMais: resultado.temMais,
+    };
+  });
+
+  app.delete('/scans/:id', protegida, async (request, reply) => {
+    const parametros = parametroIdSchema.safeParse(request.params);
+    if (!parametros.success) {
+      return reply.status(400).send({
+        error: { code: 'DADOS_INVALIDOS', message: 'Identificador inválido.' },
+      });
+    }
+
+    const { accessToken } = obterSessao(request);
+    const excluida = await repositorio.excluirAnalise(accessToken, parametros.data.id);
+    if (!excluida) {
+      return reply.status(404).send(RESPOSTA_NAO_ENCONTRADA);
+    }
+
+    return reply.status(204).send();
   });
 
   app.get('/scans/:id', protegida, async (request, reply) => {
