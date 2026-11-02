@@ -1,0 +1,32 @@
+# Blueprint do Render (plano gratuito). Os valores secretos entram no painel do Render,
+# nunca neste arquivo. `sync: false` faz o Render pedir o valor na criação do serviço.
+services:
+  - type: web
+    name: sentinela-api
+    runtime: node
+    plan: free
+    region: oregon
+    rootDir: backend
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: NODE_ENV
+        value: production
+      # O padrão é 127.0.0.1, que não aceita tráfego vindo de fora do contêiner.
+      - key: HOST
+        value: 0.0.0.0
+      - key: LOG_LEVEL
+        value: info
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      # Origem do front na Vercel, por exemplo https://sentinela.vercel.app
+      - key: CORS_ORIGIN
+        sync: false
+      # Opcional. Sem ela, a explicação usa só o texto das regras.
+      - key: ANTHROPIC_API_KEY
+        sync: false
