@@ -48,7 +48,7 @@ async function carregar(novaBusca: boolean): Promise<void> {
     return;
   }
 
-  const paginaAlvo = novaBusca ? 0 : paginaAtual.value + 1;
+  const paginaAlvo = novaBusca ? 1 : paginaAtual.value + 1;
   carregando.value = true;
   erro.value = null;
 

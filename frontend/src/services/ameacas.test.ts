@@ -31,13 +31,13 @@ describe('listarAmeacas', () => {
   it('monta a consulta com filtros e envia o token', async () => {
     const fetchFalso = vi
       .fn()
-      .mockResolvedValue(respostaJson({ itens: [AMEACA], pagina: 0, limite: 20, temMais: false }));
+      .mockResolvedValue(respostaJson({ itens: [AMEACA], pagina: 1, limite: 20, temMais: false }));
     vi.stubGlobal('fetch', fetchFalso);
 
     const lista = await listarAmeacas('token-de-teste', {
       categoria: 'malware',
       severidade: 'critico',
-      pagina: 0,
+      pagina: 1,
       limite: 20,
     });
 
@@ -53,10 +53,10 @@ describe('listarAmeacas', () => {
   it('não envia filtros que não foram escolhidos', async () => {
     const fetchFalso = vi
       .fn()
-      .mockResolvedValue(respostaJson({ itens: [], pagina: 0, limite: 20, temMais: false }));
+      .mockResolvedValue(respostaJson({ itens: [], pagina: 1, limite: 20, temMais: false }));
     vi.stubGlobal('fetch', fetchFalso);
 
-    await listarAmeacas('t', { pagina: 0, limite: 20 });
+    await listarAmeacas('t', { pagina: 1, limite: 20 });
 
     const [url] = fetchFalso.mock.calls[0] as [string];
     expect(url).not.toContain('categoria');
@@ -69,11 +69,11 @@ describe('listarAmeacas', () => {
       vi
         .fn()
         .mockResolvedValue(
-          respostaJson({ itens: [{ id: 'nao-uuid' }], pagina: 0, limite: 20, temMais: false }),
+          respostaJson({ itens: [{ id: 'nao-uuid' }], pagina: 1, limite: 20, temMais: false }),
         ),
     );
 
-    await expect(listarAmeacas('t', { pagina: 0, limite: 20 })).rejects.toThrow();
+    await expect(listarAmeacas('t', { pagina: 1, limite: 20 })).rejects.toThrow();
   });
 });
 
