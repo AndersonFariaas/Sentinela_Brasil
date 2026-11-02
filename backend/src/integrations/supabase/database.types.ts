@@ -508,7 +508,28 @@ export type Database = {
       };
     };
     Views: { [_ in never]: never };
-    Functions: { [_ in never]: never };
+    Functions: {
+      registrar_escaneamento: {
+        Args: {
+          p_url: string;
+          p_normalized_url: string;
+          p_host: string;
+          p_classification: string;
+          p_risk_score: number;
+          p_risk_level: string;
+          p_rules_triggered: Json;
+          p_evidence: Json;
+          p_sources_consulted: Json;
+          p_algorithm_version: string;
+          p_ai_status: string;
+          p_provider: string;
+          p_model: string | null;
+          p_prompt_version: string;
+          p_analysis_content: Json;
+        };
+        Returns: string;
+      };
+    };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
   };
