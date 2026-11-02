@@ -85,10 +85,24 @@ describe('rotas do Threat Feed', () => {
     expect(resposta.statusCode).toBe(200);
     expect(listarAmeacas).toHaveBeenCalledWith(
       TOKEN_VALIDO,
-      expect.objectContaining({ limite: 2, pagina: 0 }),
+      expect.objectContaining({ limite: 2, pagina: 1 }),
     );
-    expect(resposta.json()).toMatchObject({ limite: 1, pagina: 0, temMais: true });
+    expect(resposta.json()).toMatchObject({ limite: 1, pagina: 1, temMais: true });
     expect(resposta.json<{ itens: unknown[] }>().itens).toHaveLength(1);
+  });
+
+  it('recusa a página 0, já que a paginação começa em 1', async () => {
+    const listarAmeacas = vi.fn();
+    const servidor = await iniciar(leitorFalso({ listarAmeacas }));
+
+    const resposta = await servidor.inject({
+      method: 'GET',
+      url: '/api/v1/threats?pagina=0',
+      headers: AUTENTICADO,
+    });
+
+    expect(resposta.statusCode).toBe(400);
+    expect(listarAmeacas).not.toHaveBeenCalled();
   });
 
   it('repassa os filtros de categoria e severidade', async () => {
