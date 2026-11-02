@@ -49,6 +49,18 @@ describe('validarUrlEntrada', () => {
     ['localhost', 'http://localhost:8080/'],
     ['nome sem ponto', 'http://intranet/'],
     ['sufixo .internal', 'http://painel.internal/'],
+    ['localhost com ponto final', 'http://localhost./'],
+    ['subdomínio de localhost', 'http://api.localhost/'],
+    ['sufixo .localdomain com ponto final', 'http://servidor.localdomain./'],
+    ['IPv4 em decimal (127.0.0.1)', 'http://2130706433/'],
+    ['IPv4 em hexadecimal (127.0.0.1)', 'http://0x7f000001/'],
+    ['IPv4 em octal (127.0.0.1)', 'http://0177.0.0.1/'],
+    ['endereço zero', 'http://0.0.0.0/'],
+    ['espaço compartilhado CGNAT 100.64/10', 'http://100.64.0.1/'],
+    ['IPv6 link-local', 'http://[fe80::1]/'],
+    ['IPv6 único local (fd00::/8)', 'http://[fd00::1]/'],
+    ['IPv6 multicast', 'http://[ff02::1]/'],
+    ['metadados de nuvem em IPv6 mapeado', 'http://[::ffff:169.254.169.254]/'],
   ])('rejeita endereço interno: %s', (_, entrada) => {
     expect(validarUrlEntrada(entrada)).toEqual({ ok: false, motivo: 'interno' });
   });
