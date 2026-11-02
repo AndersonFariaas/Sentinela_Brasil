@@ -186,3 +186,39 @@ Este resumo não substitui orientação jurídica.
 - [ ] Migrations aplicadas com revisão humana. Nada em produção sem confirmação do responsável.
 - [ ] Varredura de segredos no histórico do repositório antes de torná-lo público.
 - [ ] Plano de rotação de chaves documentado.
+
+---
+
+## 14. Revisão da Fase 9 (02/11/2026)
+
+**Brechas encontradas pelos testes e corrigidas**
+
+- Nome interno com ponto final (`http://localhost./`, `http://servidor.localdomain./`) não era recusado. O sufixo não casava com o ponto final. Corrigido em `validacao.ts`.
+- Multicast IPv6 (`ff00::/8`) não estava na lista de endereços internos. Corrigido.
+
+Como o scanner não acessa a URL, essas brechas não causavam conexão. Mesmo assim, contrariavam a regra de recusa. Os casos estão em `validacao.test.ts`.
+
+**Advisors do Supabase (projeto de desenvolvimento)**
+
+Dois avisos, ambos intencionais:
+
+- `cancelar_inscricao` pode ser chamada pelo papel `anon`. É o link de cancelamento do e-mail, que funciona sem login. Risco aceito: o parâmetro é um UUID aleatório, então não dá para adivinhar um ID válido, e a função só desativa uma inscrição.
+- `registrar_escaneamento` pode ser chamada por usuário autenticado. Usa `auth.uid()` e só grava no nome de quem chama.
+
+**Dependências**
+
+- `npm audit --omit=dev` (backend e frontend): zero vulnerabilidades em produção.
+- As moderadas são só de desenvolvimento, da cadeia do ESLint. O próprio `npm audit` indica correção só com troca de versão maior dessas ferramentas. Fica registrado, sem alterar agora. O CI só barra vulnerabilidades altas.
+
+**Histórico do repositório**
+
+- A busca por padrões de chave (Resend, Anthropic, Supabase no formato antigo e no novo, GitHub, AWS) não achou nenhum valor. A palavra `service_role` aparece em código e em documentação, sem valor associado.
+- Isso não substitui a varredura completa com gitleaks antes de tornar o repositório público (SEN-014). Essa varredura continua pendente.
+
+**Falsos negativos do motor**
+
+O relatório de `npm run metricas` lista 10 URLs perigosas que o motor não marca. Duas causas: um termo de isca sozinho não chega ao limiar de suspeito, e um IP escondido em parâmetro de redirecionamento não é analisado. Corrigir isso muda pesos em `risk-rules.json` e exige decisão do time. Não foi feito nesta fase.
+
+**Retenção**
+
+O job `npm run limpeza` aplica os prazos de `database.md` §6 com service_role. Sem `--executar`, só conta. O agendamento diário depende de hospedagem e entra na Fase 10.
