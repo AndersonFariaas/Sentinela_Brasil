@@ -13,7 +13,21 @@ const MENSAGEM_CREDENCIAIS = 'E-mail ou senha inválidos.';
 const MENSAGEM_INDISPONIVEL = 'Não foi possível concluir agora. Tente novamente em instantes.';
 const MENSAGEM_CADASTRO =
   'Não foi possível concluir o cadastro. Verifique os dados e tente novamente.';
+const MENSAGEM_EMAIL_NAO_CONFIRMADO =
+  'Confirme seu e-mail antes de entrar. Procure o link na caixa de entrada e no spam.';
 const CODIGO_CREDENCIAIS_INVALIDAS = 'invalid_credentials';
+const CODIGO_EMAIL_NAO_CONFIRMADO = 'email_not_confirmed';
+
+/** Traduz o código do Supabase. Só falhas conhecidas ganham mensagem própria. */
+function mensagemDeErroDeLogin(codigo: string | undefined): string {
+  if (codigo === CODIGO_CREDENCIAIS_INVALIDAS) {
+    return MENSAGEM_CREDENCIAIS;
+  }
+  if (codigo === CODIGO_EMAIL_NAO_CONFIRMADO) {
+    return MENSAGEM_EMAIL_NAO_CONFIRMADO;
+  }
+  return MENSAGEM_INDISPONIVEL;
+}
 
 export const useSessaoStore = defineStore('sessao', () => {
   const sessao = ref<Session | null>(null);
@@ -66,9 +80,7 @@ export const useSessaoStore = defineStore('sessao', () => {
     });
 
     if (error) {
-      throw new ErroAutenticacao(
-        error.code === CODIGO_CREDENCIAIS_INVALIDAS ? MENSAGEM_CREDENCIAIS : MENSAGEM_INDISPONIVEL,
-      );
+      throw new ErroAutenticacao(mensagemDeErroDeLogin(error.code));
     }
 
     await aplicarSessao(data.session);

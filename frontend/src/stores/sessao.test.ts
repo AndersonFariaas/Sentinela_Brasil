@@ -65,6 +65,22 @@ describe('useSessaoStore', () => {
     expect(sessao.autenticado).toBe(false);
   });
 
+  it('entrar com e-mail ainda não confirmado orienta a confirmar o cadastro', async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: { session: null },
+      error: { code: 'email_not_confirmed', message: 'Email not confirmed' },
+    });
+    const sessao = useSessaoStore();
+
+    const erro = await sessao.entrar('ana@exemplo.com', 'senha-de-teste').catch((e: unknown) => e);
+
+    expect(erro).toBeInstanceOf(ErroAutenticacao);
+    expect((erro as Error).message).toBe(
+      'Confirme seu e-mail antes de entrar. Procure o link na caixa de entrada e no spam.',
+    );
+    expect(sessao.autenticado).toBe(false);
+  });
+
   it('entrar com falha que não é de credencial não expõe o detalhe técnico', async () => {
     auth.signInWithPassword.mockResolvedValue({
       data: { session: null },
