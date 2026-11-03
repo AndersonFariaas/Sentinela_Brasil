@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { HOSTS_COLETA_PERMITIDOS } from '../../config/egress.js';
 import { ErroColeta } from '../../modules/intelligence/erros.js';
 import type {
   AdaptadorFonte,
@@ -15,7 +16,7 @@ const TAMANHO_MAXIMO_FEED_BYTES = 10 * 1024 * 1024;
 export const OPCOES_CISA_KEV: OpcoesBusca = {
   timeoutMs: 20_000,
   tamanhoMaximoBytes: TAMANHO_MAXIMO_FEED_BYTES,
-  hostsPermitidos: ['www.cisa.gov'],
+  hostsPermitidos: HOSTS_COLETA_PERMITIDOS,
 };
 
 // Só os campos que o SENTINELA usa. Os demais campos do feed são ignorados.
