@@ -174,18 +174,18 @@ Este resumo não substitui orientação jurídica.
 
 ## 13. Checklist de deploy (seed da Fase 10)
 
-- [ ] `service_role` presente apenas no ambiente do back-end.
-- [ ] Nenhuma variável `VITE_*` contém segredo.
+- [x] `service_role` presente apenas no ambiente do back-end (confirmado: o front não a lê, e ela só existe no GitHub Actions).
+- [x] Nenhuma variável `VITE_*` contém segredo (confirmado: só URL e chave publishable do Supabase, e a URL da API).
 - [ ] RLS ativo em todas as tabelas de `public`, com testes passando.
 - [ ] `get_advisors` do Supabase sem alerta de segurança aberto.
-- [ ] CORS restrito às origens de produção.
+- [x] CORS restrito às origens de produção (confirmado: a API aceita só a origem da Vercel, e recusa origens externas).
 - [ ] Rate limit ativo e testado com carga leve.
 - [ ] Lista de saída de rede conferida.
 - [ ] Logs sem segredo (teste com token falso).
 - [ ] HTTPS em todos os domínios, com redirecionamento de HTTP.
 - [ ] Migrations aplicadas com revisão humana. Nada em produção sem confirmação do responsável.
-- [ ] Varredura de segredos no histórico do repositório antes de torná-lo público.
-- [ ] Plano de rotação de chaves documentado.
+- [x] Varredura de segredos no histórico do repositório antes de torná-lo público (SEN-014, em 02/11/2026, sem vazamento).
+- [x] Plano de rotação de chaves documentado em [deployment.md](deployment.md#rotação-de-chaves).
 
 ---
 
