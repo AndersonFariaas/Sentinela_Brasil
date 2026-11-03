@@ -13,6 +13,9 @@ const MENSAGEM_CREDENCIAIS = 'E-mail ou senha inválidos.';
 const MENSAGEM_INDISPONIVEL = 'Não foi possível concluir agora. Tente novamente em instantes.';
 const MENSAGEM_CADASTRO =
   'Não foi possível concluir o cadastro. Verifique os dados e tente novamente.';
+const MENSAGEM_LIMITE_DE_ENVIO =
+  'Muitas tentativas de cadastro em pouco tempo. Aguarde cerca de uma hora e tente de novo.';
+const CODIGO_LIMITE_DE_ENVIO = 'over_email_send_rate_limit';
 const MENSAGEM_EMAIL_NAO_CONFIRMADO =
   'Confirme seu e-mail antes de entrar. Procure o link na caixa de entrada e no spam.';
 const CODIGO_CREDENCIAIS_INVALIDAS = 'invalid_credentials';
@@ -93,7 +96,9 @@ export const useSessaoStore = defineStore('sessao', () => {
     });
 
     if (error) {
-      throw new ErroAutenticacao(MENSAGEM_CADASTRO);
+      throw new ErroAutenticacao(
+        error.code === CODIGO_LIMITE_DE_ENVIO ? MENSAGEM_LIMITE_DE_ENVIO : MENSAGEM_CADASTRO,
+      );
     }
 
     // Com confirmação de e-mail ativa, o Supabase não devolve sessão até o link ser aberto.
