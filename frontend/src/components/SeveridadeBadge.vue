@@ -5,10 +5,11 @@ import { ROTULOS_SEVERIDADE, type Severidade } from '@/constantes/ameacas';
 const props = defineProps<{ severidade: Severidade }>();
 
 // A cor sempre vem junto do texto, então o significado não depende só de cor.
+// A escala sobe em ordem: neutro, âmbar, laranja e vermelho.
 const estilos: Record<Severidade, string> = {
   baixo: 'border-borda text-texto-suave',
-  moderado: 'border-info text-info',
-  alto: 'border-atencao text-atencao',
+  moderado: 'border-atencao text-atencao',
+  alto: 'border-alerta text-alerta',
   critico: 'border-risco text-risco',
 };
 
