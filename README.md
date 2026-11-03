@@ -52,7 +52,7 @@ docs/       Arquitetura, banco, segurança, backlog e roadmap
 .github/    Pipeline de integração contínua
 ```
 
-Documentação de decisões está em [docs/architecture.md](docs/architecture.md), [docs/database.md](docs/database.md) e [docs/security.md](docs/security.md).
+Documentação de decisões está em [docs/architecture.md](docs/architecture.md), [docs/database.md](docs/database.md) e [docs/security.md](docs/security.md). Os endpoints da API estão em [docs/api.md](docs/api.md), a publicação gratuita em [docs/deployment.md](docs/deployment.md), e o fluxo de contribuição em [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Coleta de ameaças (Fase 4)
 

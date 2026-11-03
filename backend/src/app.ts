@@ -28,6 +28,10 @@ import { threatsRoutes } from './modules/threats/threats.routes.js';
 
 export const PREFIXO_API = '/api/v1';
 
+// O padrão do @fastify/cors libera só leitura e POST. Sem PUT e DELETE, o navegador bloqueia
+// alertas e exclusão de análises, mesmo com a origem liberada.
+const METODOS_CORS = ['GET', 'HEAD', 'POST', 'PUT', 'DELETE'];
+
 /** Erros do Fastify trazem status e código, mas erros lançados à mão podem não ter. */
 interface ErroHttp extends Error {
   statusCode?: number | undefined;
@@ -63,7 +67,7 @@ export async function buildApp(env: Env, opcoes: OpcoesApp = {}): Promise<Fastif
     opcoes.provedorIa !== undefined ? opcoes.provedorIa : criarProvedorIaPadrao(env);
 
   await app.register(helmet);
-  await app.register(cors, { origin: env.CORS_ORIGIN });
+  await app.register(cors, { origin: env.CORS_ORIGIN, methods: METODOS_CORS });
   // Global desligado: cada rota declara o próprio limite.
   await app.register(rateLimit, { global: false });
 

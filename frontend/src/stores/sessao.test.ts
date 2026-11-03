@@ -65,6 +65,22 @@ describe('useSessaoStore', () => {
     expect(sessao.autenticado).toBe(false);
   });
 
+  it('entrar com e-mail ainda não confirmado orienta a confirmar o cadastro', async () => {
+    auth.signInWithPassword.mockResolvedValue({
+      data: { session: null },
+      error: { code: 'email_not_confirmed', message: 'Email not confirmed' },
+    });
+    const sessao = useSessaoStore();
+
+    const erro = await sessao.entrar('ana@exemplo.com', 'senha-de-teste').catch((e: unknown) => e);
+
+    expect(erro).toBeInstanceOf(ErroAutenticacao);
+    expect((erro as Error).message).toBe(
+      'Confirme seu e-mail antes de entrar. Procure o link na caixa de entrada e no spam.',
+    );
+    expect(sessao.autenticado).toBe(false);
+  });
+
   it('entrar com falha que não é de credencial não expõe o detalhe técnico', async () => {
     auth.signInWithPassword.mockResolvedValue({
       data: { session: null },
@@ -88,6 +104,24 @@ describe('useSessaoStore', () => {
 
     expect(resultado).toBe('confirmar-email');
     expect(sessao.autenticado).toBe(false);
+  });
+
+  it('cadastrar com limite de envio de e-mail explica a espera, sem expor o detalhe', async () => {
+    auth.signUp.mockResolvedValue({
+      data: { session: null },
+      error: { code: 'over_email_send_rate_limit', message: '429: email rate limit exceeded' },
+    });
+    const sessao = useSessaoStore();
+
+    const erro = await sessao
+      .cadastrar('ana@exemplo.com', 'senha-forte-1')
+      .catch((e: unknown) => e);
+
+    expect(erro).toBeInstanceOf(ErroAutenticacao);
+    expect((erro as Error).message).toBe(
+      'Muitas tentativas de cadastro em pouco tempo. Aguarde cerca de uma hora e tente de novo.',
+    );
+    expect((erro as Error).message).not.toContain('rate limit');
   });
 
   it('sair limpa a sessão e o perfil', async () => {

@@ -56,12 +56,21 @@ async function enviar(): Promise<void> {
       apoio="Crie sua conta para acompanhar ameaças e verificar endereços."
     />
 
-    <section v-if="emailParaConfirmar" class="cartao space-y-4" aria-live="polite">
+    <section v-if="emailParaConfirmar" class="cartao space-y-4" role="status">
+      <h2 class="text-lg font-semibold">Confirme seu e-mail antes de entrar</h2>
       <p>
         Enviamos um link de confirmação para <strong>{{ emailParaConfirmar }}</strong
-        >. Abra o link para ativar sua conta e depois entre.
+        >.
       </p>
-      <RouterLink :to="{ name: 'entrar' }" class="link">Ir para a tela de entrar</RouterLink>
+      <ol class="list-decimal space-y-2 pl-5">
+        <li>Abra o e-mail e procure a mensagem do SENTINELA. Confira também o spam.</li>
+        <li>Clique no link de confirmação.</li>
+        <li>Volte aqui e entre com o mesmo e-mail e senha.</li>
+      </ol>
+      <p class="text-texto-suave text-sm">Sem a confirmação, o login não funciona.</p>
+      <RouterLink :to="{ name: 'entrar' }" class="botao-primario"
+        >Já confirmei, quero entrar</RouterLink
+      >
     </section>
 
     <form v-else novalidate class="space-y-4" @submit.prevent="enviar">
