@@ -9,6 +9,11 @@ updates:
     cooldown:
       default-days: 14
     open-pull-requests-limit: 5
+    # Os tipos acompanham o Node do runtime (Node 24 no Render). Uma versão maior dos tipos
+    # descreveria APIs que o projeto não roda.
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: npm
     directory: /frontend
@@ -17,6 +22,9 @@ updates:
     cooldown:
       default-days: 14
     open-pull-requests-limit: 5
+    ignore:
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
 
   - package-ecosystem: npm
     directory: /
