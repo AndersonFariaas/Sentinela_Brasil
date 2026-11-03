@@ -4,6 +4,7 @@ import { RouterLink, useRoute, useRouter } from 'vue-router';
 import CampoFormulario from '@/components/CampoFormulario.vue';
 import CabecalhoPagina from '@/components/CabecalhoPagina.vue';
 import EstadoErro from '@/components/EstadoErro.vue';
+import MarcaSentinela from '@/components/MarcaSentinela.vue';
 import { entrarSchema } from '@/schemas/autenticacao';
 import { errosPorCampo } from '@/schemas/erros';
 import { destinoSeguro } from '@/router';
@@ -46,6 +47,7 @@ async function enviar(): Promise<void> {
 
 <template>
   <main class="mx-auto max-w-sm space-y-6 px-4 py-8">
+    <MarcaSentinela />
     <CabecalhoPagina titulo="Entrar" apoio="Use o e-mail e a senha da sua conta." />
 
     <form novalidate class="space-y-4" @submit.prevent="enviar">

@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router';
 import CabecalhoPagina from '@/components/CabecalhoPagina.vue';
 import CampoFormulario from '@/components/CampoFormulario.vue';
 import EstadoErro from '@/components/EstadoErro.vue';
+import MarcaSentinela from '@/components/MarcaSentinela.vue';
 import { cadastroSchema } from '@/schemas/autenticacao';
 import { errosPorCampo } from '@/schemas/erros';
 import { ErroAutenticacao, useSessaoStore } from '@/stores/sessao';
@@ -51,6 +52,7 @@ async function enviar(): Promise<void> {
 
 <template>
   <main class="mx-auto max-w-sm space-y-6 px-4 py-8">
+    <MarcaSentinela />
     <CabecalhoPagina
       titulo="Criar conta"
       apoio="Crie sua conta para acompanhar ameaças e verificar endereços."

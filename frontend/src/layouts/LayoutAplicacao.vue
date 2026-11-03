@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { LogOut, ShieldCheck } from 'lucide-vue-next';
+import {
+  Bell,
+  History,
+  LayoutDashboard,
+  LogOut,
+  ScanSearch,
+  ShieldAlert,
+  ShieldCheck,
+} from 'lucide-vue-next';
 import { ref } from 'vue';
 import { RouterLink, RouterView, useRouter } from 'vue-router';
 import { ErroAutenticacao, useSessaoStore } from '@/stores/sessao';
@@ -10,12 +18,13 @@ const router = useRouter();
 const erroAoSair = ref('');
 const saindo = ref(false);
 
+// No celular a barra de baixo usa rótulo curto, para caber cinco itens em uma linha.
 const itensNavegacao = [
-  { rota: 'painel', rotulo: 'Painel' },
-  { rota: 'ameacas', rotulo: 'Threat Intelligence' },
-  { rota: 'detector', rotulo: 'Detector' },
-  { rota: 'historico', rotulo: 'Histórico' },
-  { rota: 'alertas', rotulo: 'Alertas' },
+  { rota: 'painel', rotulo: 'Painel', rotuloCurto: 'Painel', icone: LayoutDashboard },
+  { rota: 'ameacas', rotulo: 'Threat Intelligence', rotuloCurto: 'Ameaças', icone: ShieldAlert },
+  { rota: 'detector', rotulo: 'Detector', rotuloCurto: 'Detector', icone: ScanSearch },
+  { rota: 'historico', rotulo: 'Histórico', rotuloCurto: 'Histórico', icone: History },
+  { rota: 'alertas', rotulo: 'Alertas', rotuloCurto: 'Alertas', icone: Bell },
 ] as const;
 
 async function sair(): Promise<void> {
@@ -44,7 +53,7 @@ async function sair(): Promise<void> {
     </a>
 
     <header class="border-b border-borda bg-superficie">
-      <div class="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-3 px-4 py-3">
+      <div class="mx-auto flex max-w-5xl items-center justify-between gap-3 px-4 py-3">
         <RouterLink
           :to="{ name: 'painel' }"
           class="inline-flex min-h-11 items-center gap-2 text-lg font-bold tracking-wide"
@@ -64,27 +73,35 @@ async function sair(): Promise<void> {
         </div>
       </div>
 
-      <!-- Quebra em linhas no celular: um item escondido por rolagem seria um item que o usuário não vê. -->
-      <nav aria-label="Principal" class="mx-auto max-w-5xl px-4 pb-2">
-        <ul class="flex flex-wrap gap-1">
-          <li v-for="item in itensNavegacao" :key="item.rota">
-            <RouterLink
-              :to="{ name: item.rota }"
-              class="inline-flex min-h-11 items-center rounded-md px-3 text-texto-suave hover:text-texto"
-              active-class="bg-fundo !text-acao"
-            >
-              {{ item.rotulo }}
-            </RouterLink>
-          </li>
-        </ul>
-      </nav>
-
       <p v-if="erroAoSair" role="alert" class="mx-auto max-w-5xl px-4 pb-3 text-risco">
         {{ erroAoSair }}
       </p>
     </header>
 
-    <main id="conteudo" tabindex="-1" class="mx-auto max-w-5xl space-y-8 px-4 py-8">
+    <!--
+      No celular, a navegação fica fixa embaixo, como nos apps: o polegar alcança e o item
+      nunca some por rolagem. Em telas maiores, vira uma faixa logo abaixo do cabeçalho.
+    -->
+    <nav
+      aria-label="Principal"
+      class="fixed inset-x-0 bottom-0 z-40 border-t border-borda bg-superficie pb-[env(safe-area-inset-bottom)] sm:static sm:border-t-0 sm:border-b sm:pb-0"
+    >
+      <ul class="mx-auto grid max-w-5xl grid-cols-5 sm:flex sm:gap-1 sm:px-4">
+        <li v-for="item in itensNavegacao" :key="item.rota">
+          <RouterLink
+            :to="{ name: item.rota }"
+            class="flex min-h-14 flex-col items-center justify-center gap-1 px-1 text-xs text-texto-suave hover:text-texto sm:min-h-11 sm:flex-row sm:gap-2 sm:rounded-md sm:px-3 sm:text-sm"
+            active-class="!text-acao sm:bg-fundo"
+          >
+            <component :is="item.icone" class="size-5" aria-hidden="true" />
+            <span class="sm:hidden">{{ item.rotuloCurto }}</span>
+            <span class="hidden sm:inline">{{ item.rotulo }}</span>
+          </RouterLink>
+        </li>
+      </ul>
+    </nav>
+
+    <main id="conteudo" tabindex="-1" class="mx-auto max-w-5xl space-y-8 px-4 py-8 pb-28 sm:pb-8">
       <RouterView />
     </main>
   </div>

@@ -1,17 +1,15 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue';
-import { RouterLink } from 'vue-router';
 import CabecalhoPagina from '@/components/CabecalhoPagina.vue';
+import CartaoAmeaca from '@/components/CartaoAmeaca.vue';
 import EstadoCarregando from '@/components/EstadoCarregando.vue';
 import EstadoErro from '@/components/EstadoErro.vue';
 import EstadoVazio from '@/components/EstadoVazio.vue';
-import SeveridadeBadge from '@/components/SeveridadeBadge.vue';
 import {
   CATEGORIAS,
   ROTULOS_CATEGORIA,
   SEVERIDADES,
   ROTULOS_SEVERIDADE,
-  formatarData,
   type Categoria,
   type Severidade,
 } from '@/constantes/ameacas';
@@ -123,23 +121,8 @@ watch([categoria, severidade], () => void carregar(true));
 
     <template v-else>
       <ul class="space-y-3" aria-label="Lista de ameaças">
-        <li v-for="ameaca in itens" :key="ameaca.id" class="cartao space-y-3">
-          <div class="flex flex-wrap items-center gap-2 text-sm text-texto-suave">
-            <span>{{ ROTULOS_CATEGORIA[ameaca.categoria] }}</span>
-            <span aria-hidden="true">·</span>
-            <SeveridadeBadge :severidade="ameaca.severidade" />
-          </div>
-
-          <h2 class="text-lg font-semibold">
-            <RouterLink :to="{ name: 'ameaca', params: { id: ameaca.id } }" class="link">
-              {{ ameaca.titulo }}
-            </RouterLink>
-          </h2>
-
-          <p class="text-sm text-texto-suave">
-            Fonte: {{ ameaca.fonte?.nome ?? 'não informada' }} · Publicado em
-            {{ formatarData(ameaca.publicadoEm) }}
-          </p>
+        <li v-for="ameaca in itens" :key="ameaca.id">
+          <CartaoAmeaca :ameaca="ameaca" />
         </li>
       </ul>
 
