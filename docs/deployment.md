@@ -81,6 +81,28 @@ Para testar sem esperar a madrugada: _Actions > Coleta e alertas > Run workflow_
 
 O repositório já está público. A varredura de segredos no histórico completo (SEN-014) precisa ser feita antes de publicar o site, e um segredo achado no histórico se resolve rotacionando a chave, não só apagando o arquivo.
 
+## Rotação de chaves
+
+Troque uma chave quando ela aparecer onde não deveria (chat, log, print, commit), quando alguém que a conhecia sair do projeto, ou depois de uma varredura que achar um segredo. Sem suspeita, faça uma troca preventiva a cada seis meses.
+
+| Chave                       | Onde fica                          | Trocar em                                  |
+| --------------------------- | ---------------------------------- | ------------------------------------------ |
+| `SUPABASE_SERVICE_ROLE_KEY` | GitHub Actions (coleta e retenção) | Supabase > API Keys. Não existe no Render. |
+| `SUPABASE_ANON_KEY`         | Render                             | Supabase > API Keys                        |
+| `VITE_SUPABASE_ANON_KEY`    | Vercel                             | Supabase > API Keys                        |
+| `RESEND_API_KEY`            | GitHub Actions                     | Resend > API Keys                          |
+| `ANTHROPIC_API_KEY`         | Render (opcional)                  | Console da Anthropic                       |
+
+Passos, na mesma ordem para cada chave:
+
+1. Gere a nova chave no painel do fornecedor.
+2. Atualize o valor em **todos** os lugares da tabela (Render, Vercel e GitHub, conforme a coluna "Onde fica").
+3. Refaça o deploy: Render (**Manual Deploy**) e Vercel (**Redeploy**). Para o GitHub, a próxima execução já usa o novo segredo.
+4. Confira: o `health` do Render responde `ok`, o login funciona no site e a coleta roda verde.
+5. Só então revogue a chave antiga no painel do fornecedor. Revogar antes do passo 4 derruba o site.
+
+Nunca cole chaves em issues, PRs, chats ou logs. A `SUPABASE_SERVICE_ROLE_KEY` dá acesso total ao banco: se ela vazar, troque primeiro e investigue depois.
+
 ## Reverter
 
 - **Render:** em _Deploys_, escolha um deploy anterior e clique em _Rollback_.
