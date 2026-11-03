@@ -15,7 +15,7 @@ jobs:
     name: Formatação (raiz)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -30,7 +30,7 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
@@ -52,7 +52,7 @@ jobs:
       pull-requests: read
     steps:
       # Histórico completo: um segredo removido em commit antigo continua exposto.
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       # Fixada no commit da v3.0.0 para que uma tag movida não altere o que roda.
@@ -67,7 +67,7 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
